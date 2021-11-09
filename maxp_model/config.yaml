@@ -1,0 +1,31 @@
+MODEL:
+  GNN_MODEL: graphconv # ['graphsage', 'graphconv', 'graphattn', 'graphmodel']
+  MODE: 1
+  IN_FEAT: 300
+  HIDDEN_DIM: 512
+  N_LAYERS: 2
+  MLP_DIM: 256
+  NUM_ATTENTION_HEADS: 8
+  N_CLASS: 23
+  INPUT_DROP: 0.1
+  DROP_RATE: 0.5
+  ATTN_DROP: 0.1
+  CHECKPOINT: graphmodel/split01/se_dgl_model_epoch45_val_0.6157.pth
+
+
+DATASET:
+  DATA_PATH: ../data/
+  BATCH_SIZE: 512
+  EPOCHS: 50
+  LEARNING_RATE: 0.0001
+  COEF_LR: 0.8
+  WEIGHT_DECAY: 0.0005
+  WARMUP_PROPORTION: 0.1
+  GRADIENT_ACCUMULATION_STEPS: 1
+  SEED: 2021
+  NUM_WORKERS: 2
+  LOG_STEP: 240
+  FANOUTS: [30, 30]
+  NORM_FEATURE: False
+  OUT_PATH: graphmodel/split01
+  TEST_RESULT: test_result/epoch_45_val_0.6157_result.csv

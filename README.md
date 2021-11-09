@@ -1,39 +1,44 @@
-# dgl-maxp
+# MAXP竞赛——DGL图数据Baseline模型
 
-#### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+本代码库是为2021 MAXP竞赛的DGL图数据所准备的Baseline模型，供参赛选手参考学习使用DGL来构建GNN模型。
 
-#### 软件架构
-软件架构说明
+代码库包括2个部分：
+---------------
+1. 用于数据预处理的4个Jupyter Notebook
+2. 用DGL构建的3个GNN模型(GCN,GraphSage和GAT)，以及训练模型所用的代码和辅助函数。
 
+依赖包：
+------
+- dgl==0.7.1
+- pytorch==1.7.0
+- pandas
+- numpy
+- datetime
 
-#### 安装教程
+如何运行：
+-------
+对于4个Jupyter Notebook文件，请使用Jupyter环境运行，并注意把其中的竞赛数据文件所在的文件夹替换为你自己保存数据文件的文件夹。
+并记录下你处理完成后的数据文件所在的位置，供下面模型训练使用。
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+**注意：** 在运行*MAXP 2021初赛数据探索和处理-2*时，内存的使用量会比较高。这个在Mac上运行没有出现问题，但是尚未在Windows和Linux环境测试。
+如果在这两种环境下遇到内存问题，建议找一个内存大一些的机器处理，或者修改代码，一部分一部分的处理。
 
-#### 使用说明
+---------
+整体代码结构如下：
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+```bash
+- data: 经过jupyter预处理后的特征和原数据存放处，一级目录
+- gnn: baseline 自带
+- max_model/config.yaml: 超参数、路径配置
+- max_model/ *_yaml.py: 根据配置训练，测试(前几行有显卡固定设置，单卡)
+- max_model/ model.py: 更新se
+- MAXP 2021***-1,2,3,4.ipynb: 预处理 
 
-#### 参与贡献
+```
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+训练，测试(单卡 24g) 
 
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+```bash
+--python train_yaml.py
+--python test_yaml.py
+```
