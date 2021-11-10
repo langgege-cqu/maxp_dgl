@@ -34,9 +34,9 @@ class Mul(nn.Module):
         weight_2 = self.se2(features)
         weight_3 = self.se3(features)
         
-        features_1 = torch.nn.functional.normalize(features_1, p=2, dim=1)
-        features_2 = torch.nn.functional.normalize(features_2, p=2, dim=1)
-        features_3 = torch.nn.functional.normalize(features_3, p=2, dim=1)
+        # features_1 = torch.nn.functional.normalize(features_1, p=2, dim=1)
+        # features_2 = torch.nn.functional.normalize(features_2, p=2, dim=1)
+        # features_3 = torch.nn.functional.normalize(features_3, p=2, dim=1)
         
         features = features_1 * weight_1 + features_2 * weight_2 + features_3 * weight_3
 
@@ -96,6 +96,7 @@ class GNNModel(nn.Module):
         self.graphattn = nn.ModuleList()
         self.gnn_attns = nn.ModuleList()
         self.norm_layers = nn.ModuleList()
+        self.mul = nn.ModuleList()
         
         for i in range(num_layers):
             if i == 0:
@@ -109,7 +110,7 @@ class GNNModel(nn.Module):
             self.graphsage.append(
                 dglnn.SAGEConv(in_feats=in_feats, 
                                out_feats=hidden_size, 
-                               aggregator_type='pool'))
+                               aggregator_type='lstm'))
             self.norm_layers.append(LayerNorm(hidden_size))
             
             self.graphconv.append(
@@ -127,6 +128,8 @@ class GNNModel(nn.Module):
             
             self.gnn_attns.append(nn.Linear(hidden_size, 1))
             self.norm_layers.append(LayerNorm(hidden_size))
+
+            self.mul.append(Mul(hidden_size, hidden_size))
             
         self.label_embed = nn.Embedding(num_class + 1, input_size, padding_idx=num_class)
         self.feat_mlp = nn.Sequential(
@@ -184,9 +187,9 @@ class GNNModel(nn.Module):
             h1 = self.norm_layers[5 * l](h1)
             h1 = F.elu(h1)
             
-            # h2 = self.graphsage[l](blocks[l], h)
-            # h2 = self.norm_layers[5 * l + 1](h2)
-            # h2 = F.elu(h2)
+            h2 = self.graphsage[l](blocks[l], h)
+            h2 = self.norm_layers[5 * l + 1](h2)
+            h2 = F.elu(h2)
             
             # h3 = self.graphconv[l](blocks[l], h)
             # h3 = self.norm_layers[5 * l + 2](h3)
@@ -197,12 +200,13 @@ class GNNModel(nn.Module):
             h4 = F.elu(h4)
             
             # h = torch.stack([h1, h2, h3, h4], dim=1)
-            h = torch.stack([h1, h4], dim=1)
-            attn_weights = F.softmax(self.gnn_attns[l](h), dim=1)
-            attn_weights = attn_weights.transpose(-1, -2)
-            print('attn_weights.shape:', attn_weights.shape)
-            print('h: ',h.shape)
-            h = torch.bmm(attn_weights, h)[:, 0]
+            # h = torch.stack([h1, h4], dim=1)
+            # attn_weights = F.softmax(self.gnn_attns[l](h), dim=1)
+            # attn_weights = attn_weights.transpose(-1, -2)
+            # h = torch.bmm(attn_weights, h)[:, 0]
+            # 上面是unimp模型的残差连接
+            # 下面是se的残差连接
+            h = self.mul[l](h1, h2, h4)
             
             h = self.norm_layers[5 * l + 4](h)
             h = self.dropout(h)
