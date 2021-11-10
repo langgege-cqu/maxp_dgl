@@ -38,6 +38,9 @@ class Mul(nn.Module):
         features_2 = torch.nn.functional.normalize(features_2, p=2, dim=1)
         features_3 = torch.nn.functional.normalize(features_3, p=2, dim=1)
         
+        features = features_1 * weight_1 + features_2 * weight_2 + features_3 * weight_3
+
+        return features
 
 def gcn_init_layers(layer):
     nn.init.xavier_normal_(layer.weight)
