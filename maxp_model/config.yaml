@@ -1,5 +1,5 @@
 MODEL:
-  GNN_MODEL: graphconv # ['graphsage', 'graphconv', 'graphattn', 'graphmodel']
+  GNN_MODEL: unimp # ['graphsage', 'graphconv', 'graphattn', 'graphmodel']
   MODE: 1
   IN_FEAT: 300
   HIDDEN_DIM: 512
@@ -10,7 +10,7 @@ MODEL:
   INPUT_DROP: 0.1
   DROP_RATE: 0.5
   ATTN_DROP: 0.1
-  CHECKPOINT: graphmodel/split01/se_dgl_model_epoch45_val_0.6157.pth
+  CHECKPOINT: graphmodel/split01/unmip_drop0.1_label_add_dgl_model_epoch29_val_0.6172.pth
 
 
 DATASET:
@@ -28,4 +28,4 @@ DATASET:
   FANOUTS: [30, 30]
   NORM_FEATURE: False
   OUT_PATH: graphmodel/split01
-  TEST_RESULT: test_result/epoch_45_val_0.6157_result.csv
+  TEST_RESULT: test_result/unmip_drop0.1_label_add_dgl_model_epoch29_val_0.6172_result.csv

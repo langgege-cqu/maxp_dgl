@@ -12,7 +12,7 @@ import yaml
 import dgl
 from dgl.dataloading.neighbor import MultiLayerNeighborSampler
 from dgl.dataloading.pytorch import NodeDataLoader
-
+from unimp import GNNModel
 from models import GraphSageModel, GraphConvModel, GraphAttnModel, GraphModel
 from utils import load_dgl_graph
 
@@ -59,6 +59,8 @@ def init_model(model_cfg, in_feat, device):
                            num_attention_heads=model_cfg['NUM_ATTENTION_HEADS'], n_classes=model_cfg['N_CLASS'],
                            activation=F.relu, input_drop=model_cfg['INPUT_DROP'], drop_rate=model_cfg['DROP_RATE'],
                            attn_drop=model_cfg['ATTN_DROP'])
+    elif model_cfg['GNN_MODEL'] == 'unimp':
+        model = GNNModel(input_size=model_cfg['IN_FEAT'], num_class=model_cfg['N_CLASS'])
     else:
         raise NotImplementedError('So far, only support three algorithms: GraphSage, GraphConv, and GraphAttn')
  

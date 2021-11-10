@@ -15,11 +15,12 @@ from dgl.dataloading.neighbor import MultiLayerNeighborSampler
 from dgl.dataloading.pytorch import NodeDataLoader
 from torch import optim
 from models import GraphSageModel, GraphConvModel, GraphAttnModel, GraphModel
+from unimp import GNNModel
 from utils import load_dgl_graph
 from optimization import OptimAdam
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 th.cuda.set_device(0)
 
 
@@ -67,6 +68,8 @@ def init_model(model_cfg, in_feat, device):
                            num_attention_heads=model_cfg['NUM_ATTENTION_HEADS'], n_classes=model_cfg['N_CLASS'],
                            activation=F.relu, input_drop=model_cfg['INPUT_DROP'], drop_rate=model_cfg['DROP_RATE'],
                            attn_drop=model_cfg['ATTN_DROP'])
+    elif model_cfg['GNN_MODEL'] == 'unimp':
+        model = GNNModel(input_size=model_cfg['IN_FEAT'], num_class=model_cfg['N_CLASS'])
     else:
         raise NotImplementedError('So far, only support three algorithms: GraphSage, GraphConv, and GraphAttn')
     model = model.to(device)
@@ -244,7 +247,7 @@ def train(model_cfg, dataset_cfg, device, graph_data):
         if val_acc > best_records[1]:
             best_records = [epoch + 1, val_acc]
             
-        model_path = os.path.join(output_folder, 'graphconv_label_add_dgl_model_epoch{:02d}'.format(epoch + 1) + '_val_{:.4f}'.format(val_acc)+'.pth')
+        model_path = os.path.join(output_folder, 'unmip_drop0.1_label0.1_fc_dgl_model_epoch{:02d}'.format(epoch + 1) + '_val_{:.4f}'.format(val_acc)+'.pth')
         th.save(model.state_dict(), model_path)
     
     logging.info("Best Epoch %d | Val Acc: %f ", best_records[0], best_records[1])
