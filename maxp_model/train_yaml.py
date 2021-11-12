@@ -229,7 +229,7 @@ def train(model_cfg, dataset_cfg, device, graph_data):
     logging.info('  Num steps = %d', num_train_optimization_steps * dataset_cfg['GRADIENT_ACCUMULATION_STEPS'])
 
     # optimizer = prep_optimizer(dataset_cfg, model, num_train_optimization_steps)
-    optimizer = optim.Adam(model.parameters(), lr=dataset_cfg['LEARNING_RATE'])
+    optimizer = optim.Adam(model.parameters(), lr=dataset_cfg['LEARNING_RATE'], weight_decay=dataset_cfg['WEIGHT_DECAY'])
     criterion = thnn.CrossEntropyLoss().to(device)
 
     output_folder = dataset_cfg['OUT_PATH']
@@ -247,7 +247,7 @@ def train(model_cfg, dataset_cfg, device, graph_data):
         if val_acc > best_records[1]:
             best_records = [epoch + 1, val_acc]
             
-        model_path = os.path.join(output_folder, 'se_unmip_drop0.1_label0.1_fc_dgl_model_epoch{:02d}'.format(epoch + 1) + '_val_{:.4f}'.format(val_acc)+'.pth')
+        model_path = os.path.join(output_folder, 'se_fc_drop0.1_decay0.2_dgl_model_epoch{:02d}'.format(epoch + 1) + '_val_{:.4f}'.format(val_acc)+'.pth')
         th.save(model.state_dict(), model_path)
     
     logging.info("Best Epoch %d | Val Acc: %f ", best_records[0], best_records[1])

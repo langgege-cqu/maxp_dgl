@@ -19,26 +19,72 @@ class Se(nn.Module):
     def forward(self, features):
         return self.se(features)
 
+class GraphSageModel(nn.Module):
+
+    def __init__(self,
+                 in_feats,
+                 hidden_dim,
+                 n_layers,
+                 n_classes,
+                 activation=F.relu,
+                 dropout=0):
+        super(GraphSageModel, self).__init__()
+        self.in_feats = in_feats
+        self.n_layers = n_layers
+        self.hidden_dim = hidden_dim
+        self.n_classes = n_classes
+        self.activation = activation
+        self.dropout = nn.Dropout(dropout)
+
+        self.layers = nn.ModuleList()
+
+        # build multiple layers
+        self.layers.append(dglnn.SAGEConv(in_feats=self.in_feats,
+                                          out_feats=self.hidden_dim,
+                                          aggregator_type='pool'))
+                                          # aggregator_type = 'pool'))
+        for l in range(1, (self.n_layers - 1)):
+            self.layers.append(dglnn.SAGEConv(in_feats=self.hidden_dim,
+                                              out_feats=self.hidden_dim,
+                                              aggregator_type='pool'))
+                                              # aggregator_type='pool'))
+        self.layers.append(dglnn.SAGEConv(in_feats=self.hidden_dim,
+                                          out_feats=self.n_classes,
+                                          aggregator_type='pool'))
+                                          # aggregator_type = 'pool'))
+
+    def forward(self, blocks, features):
+        h = features
+
+        for l, (layer, block) in enumerate(zip(self.layers, blocks)):
+            h = layer(block, h)
+            if l != len(self.layers) - 1:
+                h = self.activation(h)
+                h = self.dropout(h)
+
+        return h
+
+
 class Mul(nn.Module):
     def __init__(self, feature_size_1, feature_size_2):
         super().__init__()
         # 3 se
-        self.se1 = Se(feature_size_1*3, feature_size_2)
-        self.se2 = Se(feature_size_1*3, feature_size_2)
-        self.se3 = Se(feature_size_1*3, feature_size_2)
+        self.se1 = Se(feature_size_1*2, feature_size_2)
+        self.se2 = Se(feature_size_1*2, feature_size_2)
+        # self.se3 = Se(feature_size_1*2, feature_size_2)
     
-    def forward(self, features_1, features_2, features_3):
-        features = torch.cat((features_1, features_2, features_3), dim=1)
+    def forward(self, features_1, features_2):
+        features = torch.cat((features_1, features_2), dim=1)
 
         weight_1 = self.se1(features)
         weight_2 = self.se2(features)
-        weight_3 = self.se3(features)
+        # weight_3 = self.se3(features)
         
         # features_1 = torch.nn.functional.normalize(features_1, p=2, dim=1)
         # features_2 = torch.nn.functional.normalize(features_2, p=2, dim=1)
         # features_3 = torch.nn.functional.normalize(features_3, p=2, dim=1)
         
-        features = features_1 * weight_1 + features_2 * weight_2 + features_3 * weight_3
+        features = features_1 * weight_1 + features_2 * weight_2 
 
         return features
 
@@ -96,7 +142,9 @@ class GNNModel(nn.Module):
         self.graphattn = nn.ModuleList()
         self.gnn_attns = nn.ModuleList()
         self.norm_layers = nn.ModuleList()
-        self.mul = nn.ModuleList()
+        self.mul = Mul(hidden_size, hidden_size)
+
+        
         
         for i in range(num_layers):
             if i == 0:
@@ -129,7 +177,7 @@ class GNNModel(nn.Module):
             self.gnn_attns.append(nn.Linear(hidden_size, 1))
             self.norm_layers.append(LayerNorm(hidden_size))
 
-            self.mul.append(Mul(hidden_size, hidden_size))
+            # self.mul.append(Mul(hidden_size, hidden_size))
             
         self.label_embed = nn.Embedding(num_class + 1, input_size, padding_idx=num_class)
         self.feat_mlp = nn.Sequential(
@@ -181,15 +229,18 @@ class GNNModel(nn.Module):
         feature = self.feat_mlp(feature)
 
         h = feature
+        h2 = h
+        for l in range(self.num_layers):  
+            h2 = self.graphsage[l](blocks[l], h2)
+            h2 = self.norm_layers[5 * l + 1](h2)
+            h2 = F.elu(h2) 
+
         for l in range(self.num_layers):     
             h1 = expand_as_pair(h, blocks[l])[1]
             h1 = self.skips[l](h1)
             h1 = self.norm_layers[5 * l](h1)
             h1 = F.elu(h1)
             
-            h2 = self.graphsage[l](blocks[l], h)
-            h2 = self.norm_layers[5 * l + 1](h2)
-            h2 = F.elu(h2)
             
             # h3 = self.graphconv[l](blocks[l], h)
             # h3 = self.norm_layers[5 * l + 2](h3)
@@ -200,17 +251,17 @@ class GNNModel(nn.Module):
             h4 = F.elu(h4)
             
             # h = torch.stack([h1, h2, h3, h4], dim=1)
-            # h = torch.stack([h1, h4], dim=1)
-            # attn_weights = F.softmax(self.gnn_attns[l](h), dim=1)
-            # attn_weights = attn_weights.transpose(-1, -2)
-            # h = torch.bmm(attn_weights, h)[:, 0]
+            h = torch.stack([h1, h4], dim=1)
+            attn_weights = F.softmax(self.gnn_attns[l](h), dim=1)
+            attn_weights = attn_weights.transpose(-1, -2)
+            h = torch.bmm(attn_weights, h)[:, 0]
             # 上面是unimp模型的残差连接
             # 下面是se的残差连接
-            h = self.mul[l](h1, h2, h4)
+            # h = self.mul[l](h1, h2, h4)
             
             h = self.norm_layers[5 * l + 4](h)
             h = self.dropout(h)
 
+        h = self.mul(h2, h)
         output = self.head(h)
-
         return output
