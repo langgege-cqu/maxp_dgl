@@ -17,7 +17,7 @@ from models import GraphSageModel, GraphConvModel, GraphAttnModel, GraphModel
 from utils import load_dgl_graph
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 th.cuda.set_device(0)
 
 

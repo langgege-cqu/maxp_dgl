@@ -10,7 +10,7 @@ MODEL:
   INPUT_DROP: 0.1
   DROP_RATE: 0.5
   ATTN_DROP: 0.1
-  CHECKPOINT: graphmodel/split01/se_unmip_drop0.1_label0.1_fc_dgl_model_epoch12_val_0.6112.pth
+  CHECKPOINT: graphmodel/split01/se_norm_drop0.1_decay0.1_dgl_model_epoch23_val_0.6188.pth
 
 
 DATASET:
@@ -19,7 +19,7 @@ DATASET:
   EPOCHS: 50
   LEARNING_RATE: 0.0001
   COEF_LR: 0.8
-  WEIGHT_DECAY: 0.0002
+  WEIGHT_DECAY: 0.0001
   WARMUP_PROPORTION: 0.1
   GRADIENT_ACCUMULATION_STEPS: 1
   SEED: 2021
@@ -28,4 +28,4 @@ DATASET:
   FANOUTS: [30, 30]
   NORM_FEATURE: False
   OUT_PATH: graphmodel/split01
-  TEST_RESULT: test_result/se_unmip_drop0.1_label0.1_fc_dgl_model_epoch12_val_0.6112_result.csv
+  TEST_RESULT: test_result/se_norm_drop0.1_decay0.1_dgl_model_epoch23_val_0.6188_result.csv

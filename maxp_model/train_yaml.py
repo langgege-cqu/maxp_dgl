@@ -18,9 +18,10 @@ from models import GraphSageModel, GraphConvModel, GraphAttnModel, GraphModel
 from unimp import GNNModel
 from utils import load_dgl_graph
 from optimization import OptimAdam
+from APPNP import APPNP
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 th.cuda.set_device(0)
 
 
@@ -70,6 +71,8 @@ def init_model(model_cfg, in_feat, device):
                            attn_drop=model_cfg['ATTN_DROP'])
     elif model_cfg['GNN_MODEL'] == 'unimp':
         model = GNNModel(input_size=model_cfg['IN_FEAT'], num_class=model_cfg['N_CLASS'])
+    elif model_cfg['GNN_MODEL'] == 'APPNP':
+        model = APPNP(input_size=model_cfg['IN_FEAT'], num_class=model_cfg['N_CLASS'])    
     else:
         raise NotImplementedError('So far, only support three algorithms: GraphSage, GraphConv, and GraphAttn')
     model = model.to(device)
@@ -247,7 +250,7 @@ def train(model_cfg, dataset_cfg, device, graph_data):
         if val_acc > best_records[1]:
             best_records = [epoch + 1, val_acc]
             
-        model_path = os.path.join(output_folder, 'se_fc_drop0.1_decay0.2_dgl_model_epoch{:02d}'.format(epoch + 1) + '_val_{:.4f}'.format(val_acc)+'.pth')
+        model_path = os.path.join(output_folder, 'se_norm_drop0.1_decay0.1_dgl_model_epoch{:02d}'.format(epoch + 1) + '_val_{:.4f}'.format(val_acc)+'.pth')
         th.save(model.state_dict(), model_path)
     
     logging.info("Best Epoch %d | Val Acc: %f ", best_records[0], best_records[1])
