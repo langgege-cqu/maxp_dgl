@@ -127,7 +127,7 @@ def test(model_cfg, dataset_cfg, device, graph_data):
     df['label'] = df['label'].apply(id2name)
     mged = pd.merge(df, nodes_df[['node_idx', 'paper_id']], on='node_idx', how='left')
     
-    result_csv = os.path.join(dataset_cfg['out_path'], '{}_result.csv'.format(dataset_cfg['TEST_PREFIX']))
+    result_csv = os.path.join(dataset_cfg['OUT_PATH'], '{}_result.csv'.format(dataset_cfg['TEST_PREFIX']))
     pd.DataFrame({'id': mged['paper_id'], 'label': mged['label']}).to_csv(result_csv, index=False)
         
 
