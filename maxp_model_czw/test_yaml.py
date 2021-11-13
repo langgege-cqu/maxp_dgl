@@ -115,7 +115,7 @@ def test(model_cfg, dataset_cfg, device, graph_data):
     nodes_df = pd.read_csv(nodes_path, dtype={'Label':str})
         
     result = test_epoch(model, test_dataloader, node_feats, labels, model_cfg['NUM_CLASS'], device)
-    result_npy = os.path.join(dataset_cfg['out_path'], '{}_logits.npy'.format(dataset_cfg['TEST_PREFIX']))
+    result_npy = os.path.join(dataset_cfg['OUT_PATH'], '{}_logits.npy'.format(dataset_cfg['TEST_PREFIX']))
     # np.save(result_npy, result)
     
     df = pd.DataFrame({'node_idx': test_nid, 'label': np.argmax(result, axis=-1)})
