@@ -2,10 +2,10 @@ import os
 import sys
 import yaml
 import random
-import logging
 import argparse
 import numpy as np
 import torch as th
+import pandas as pd
 from tqdm import tqdm
 from torch import optim
 import torch.nn as thnn
@@ -39,9 +39,9 @@ def init_model(model_cfg, device):
     else:
         raise NotImplementedError('Not support three algorithms: {}'.format(model_cfg['GNN_MODEL']))
         
-    state = torch.load(model_cfg['CHECKPOINT'], map_location='cpu')
+    state = th.load(model_cfg['CHECKPOINT'], map_location='cpu')
     model.load_state_dict(state)
-    logging.info('Load checkpoint in: %s', args.checkpoint)
+    print('Load checkpoint in', model_cfg['CHECKPOINT'])
 
     model = model.to(device)
     return model
@@ -50,13 +50,10 @@ def init_model(model_cfg, device):
 def get_dataloader(dataset_cfg, graph_data):
     graph, labels, train_nid, val_nid, test_nid, node_feat = graph_data
     sampler = MultiLayerNeighborSampler(dataset_cfg['FANOUTS'])
+    test_dataloader = NodeDataLoader(graph, test_nid, sampler, batch_size=dataset_cfg['BATCH_SIZE'],
+                                     shuffle=False, drop_last=False, num_workers=0)
 
-    train_dataloader = NodeDataLoader(graph, train_nid, sampler, batch_size=dataset_cfg['BATCH_SIZE'],
-                                      shuffle=True, drop_last=False, num_workers=dataset_cfg['NUM_WORKERS'])
-    val_dataloader = NodeDataLoader(graph, val_nid, sampler, batch_size=dataset_cfg['BATCH_SIZE'],
-                                    shuffle=True, drop_last=False,  num_workers=dataset_cfg['NUM_WORKERS'])
-
-    return train_dataloader, val_dataloader, node_feat, labels
+    return test_dataloader, node_feat, labels
 
 
 def load_subtensor(node_feats, labels, seeds, input_nodes, n_classes, device, training=False):
@@ -81,7 +78,7 @@ def load_subtensor(node_feats, labels, seeds, input_nodes, n_classes, device, tr
     batch_labels = labels[seeds].to(device)
     return input_feats, input_labels, batch_labels
 
- 
+
 def test_epoch(model, test_dataloader, node_feats, labels, n_classes, device):
     th.cuda.empty_cache()
     model.eval()
@@ -135,7 +132,7 @@ def test(model_cfg, dataset_cfg, device, graph_data):
         
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(description='Graph Node Classification')
     parser.add_argument('--cfg_file', type=str, help="Path of config files.")
     args = parser.parse_args()
     yaml_path = args.cfg_file
