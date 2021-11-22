@@ -16,7 +16,7 @@ from dgl.dataloading.neighbor import MultiLayerNeighborSampler
 from dgl.dataloading.pytorch import NodeDataLoader
 
 from unicmp import UniCMP
-from utils import load_dgl_graph
+from util import load_dgl_graph
 
 
 def set_seed_logger(dataset_cfg):
@@ -31,13 +31,15 @@ def set_seed_logger(dataset_cfg):
     
 def init_model(model_cfg, device):
     if model_cfg['GNN_MODEL'] == 'unicmp':
-        model = UniCMP(input_size=model_cfg['INPUT_SIZE'], num_class=model_cfg['NUM_CLASS'], num_layers=model_cfg['NUM_LAYERS'],
-                       num_heads=model_cfg['NUM_HEADS'], hidden_size=model_cfg['HIDDEN_SIZE'], label_drop=model_cfg['LABEL_DROP'],
-                       feat_drop=model_cfg['FEAT_DORP'], attn_drop=model_cfg['ATTN_DROP'], drop=model_cfg['DROP'],
-                       use_sage=model_cfg['USE_SAGE'], use_conv=model_cfg['USE_CONV'], use_attn=model_cfg['USE_ATTN'],
+        model = UniCMP(input_size=model_cfg['INPUT_SIZE'], num_class=model_cfg['NUM_CLASS'],
+                       num_layers=model_cfg['NUM_LAYERS'], num_heads=model_cfg['NUM_HEADS'],
+                       hidden_size=model_cfg['HIDDEN_SIZE'], label_drop=model_cfg['LABEL_DROP'],
+                       feat_drop=model_cfg['FEAT_DORP'], attn_drop=model_cfg['ATTN_DROP'],
+                       drop=model_cfg['DROP'], use_sage=model_cfg['USE_SAGE'],
+                       use_conv=model_cfg['USE_CONV'], use_attn=model_cfg['USE_ATTN'],
                        use_resnet=model_cfg['USE_RESNET'], use_densenet=model_cfg['USE_DESNET'])
     else:
-        raise NotImplementedError('Not support three algorithms: {}'.format(model_cfg['GNN_MODEL']))
+        raise NotImplementedError('Not support algorithm: {}'.format(model_cfg['GNN_MODEL']))
         
     state = th.load(model_cfg['CHECKPOINT'], map_location='cpu')
     model.load_state_dict(state)
@@ -56,22 +58,10 @@ def get_dataloader(dataset_cfg, graph_data):
     return test_dataloader, node_feat, labels
 
 
-def load_subtensor(node_feats, labels, seeds, input_nodes, n_classes, device, training=False):
-    """
-    Copys features and labels of a set of nodes onto GPU.
-    """
+def load_subtensor(node_feats, labels, seeds, input_nodes, n_classes, device):
     input_feats = node_feats[input_nodes].to(device)
     
-    masklabels = labels.clone()
-    masklabels[seeds] = -1
-    input_labels = masklabels[input_nodes]
-        
-    if training:
-        rd_m = th.rand(input_labels.shape[0]) 
-        rd_y = th.randint(0, n_classes, size=input_labels.shape)
-        input_labels[rd_m < 0.12] = -1
-        input_labels[rd_m > 0.97] = rd_y[rd_m > 0.97]
-
+    input_labels = labels[input_nodes]
     input_labels[input_labels < 0] = n_classes
     input_labels = input_labels.to(device)
     
@@ -89,7 +79,7 @@ def test_epoch(model, test_dataloader, node_feats, labels, n_classes, device):
     with th.no_grad():
         for step, (input_nodes, seeds, blocks) in pbar:
             input_feats, input_labels, batch_labels = load_subtensor(node_feats, labels, seeds, input_nodes, 
-                                                                     n_classes, device, training=False)
+                                                                     n_classes, device)
             blocks = [block.to(device) for block in blocks]
             batch_logits = model(blocks, input_feats, input_labels)
             result.append(batch_logits.detach().cpu().numpy())
@@ -116,13 +106,8 @@ def test(model_cfg, dataset_cfg, device, graph_data):
         
     result = test_epoch(model, test_dataloader, node_feats, labels, model_cfg['NUM_CLASS'], device)
     result_npy = os.path.join(dataset_cfg['OUT_PATH'], '{}_logits.npy'.format(dataset_cfg['TEST_PREFIX']))
-    # np.save(result_npy, result)
-    
+    np.save(result_npy, result)
     df = pd.DataFrame({'node_idx': test_nid, 'label': np.argmax(result, axis=-1)})
-    for row in df.itertuples():
-        node_idx = getattr(row, 'node_idx')
-        label = getattr(row, 'label')
-        labels[node_idx] = label
         
     df['label'] = df['label'].apply(id2name)
     mged = pd.merge(df, nodes_df[['node_idx', 'paper_id']], on='node_idx', how='left')
@@ -147,3 +132,4 @@ if __name__ == '__main__':
     graph_data = load_dgl_graph(dataset_cfg['DATA_PATH'], norm_feature=dataset_cfg['NORM_FEATURE'])
         
     test(model_cfg, dataset_cfg, device, graph_data)
+    
