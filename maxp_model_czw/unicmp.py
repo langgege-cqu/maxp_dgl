@@ -48,7 +48,82 @@ class LayerNorm(nn.Module):
         x = (x - u) / torch.sqrt(s + self.variance_epsilon)
         return self.weight * x + self.bias
     
+    
+class GraphSageLayer(nn.Module):
+    def __init__(self, in_feats, out_feats, activation=F.elu, 
+                 aggregator_type='lstm', dropout=0):
+        super(GraphSageLayer, self).__init__()
+        self.graph = dglnn.SAGEConv(in_feats=in_feats, out_feats=out_feats,
+                                    aggregator_type=aggregator_type)
+        self.norm = LayerNorm(out_feats)
+        self.activation = activation
+        self.dropout = nn.Dropout(dropout)
 
+    def forward(self, block, feature):
+        h = self.graph(block, feature)
+        h = self.norm(h)
+        h = self.activation(h)
+        h = self.dropout(h)
+        return h
+
+    
+class GraphConvLayer(nn.Module):
+    def __init__(self, in_feats, out_feats, activation=F.elu, 
+                 norm_type='both', dropout=0):
+        super(GraphConvLayer, self).__init__()
+        self.graph = dglnn.GraphConv(in_feats=in_feats, out_feats=out_feats,
+                                     norm=norm_type)        
+        self.norm = LayerNorm(out_feats)
+        self.activation = activation
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, block, feature):
+        h = self.graph(block, feature)
+        h = self.norm(h)
+        h = self.activation(h)
+        h = self.dropout(h)
+        return h
+
+    
+class GraphAttnLayer(nn.Module):
+    def __init__(self, in_feats, out_feats, num_heads, activation=F.elu, 
+                 attn_drop=0, dropout=0):
+        super(GraphAttnLayer, self).__init__()
+        self.graph = dglnn.GATConv(in_feats=in_feats, out_feats=out_feats,
+                                   num_heads=num_heads, attn_drop=attn_dropout)
+        self.norm = LayerNorm(out_feats)
+        self.activation = activation
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, block, feature):
+        h = self.graph(block, feature).flatten(1)
+        h = self.norm(h)
+        h = self.activation(h)
+        h = self.dropout(h)
+        return h
+
+
+class ShortCutLayer(nn.Module):
+    def __init__(self, in_feats, out_feats, activation=F.elu, dropout=0):
+        super(ShortCutLayer, self).__init__()
+        self.graph = nn.Linear(in_feats, out_feats)
+        self.norm = LayerNorm(out_feats)
+        self.activation = activation
+        self.dropout = nn.Dropout(dropout)
+        
+        self.reset_parameters()
+    
+    def reset_parameters(self):
+        linear_init_layers(self.graph)
+        
+    def forward(self, feature):
+        h = self.graph(feature)
+        h = self.norm(h)
+        h = self.activation(h)
+        h = self.dropout(h)
+        return h
+    
+    
 class MultiHeadedAttention(nn.Module):
     def __init__(self, num_attention_heads, hidden_size, attn_drop):
         super(MultiHeadedAttention, self).__init__()
@@ -60,6 +135,13 @@ class MultiHeadedAttention(nn.Module):
         self.value = nn.Linear(hidden_size, self.all_head_size)
         self.dropout = nn.Dropout(attn_drop)
         self.softmax = nn.Softmax(dim=-1)
+        
+        self.reset_parameters()
+    
+    def reset_parameters(self):
+        linear_init_layers(self.key)
+        linear_init_layers(self.query)
+        linear_init_layers(self.value)
 
     def transpose_for_scores(self, x):
         new_x_shape = x.size()[:-1] + (self.num_attention_heads, self.attention_head_size)
@@ -91,7 +173,7 @@ class MultiHeadedAttention(nn.Module):
 class UniCMP(nn.Module):
 
     def __init__(self, input_size, num_class, num_layers=2, num_heads=4, hidden_size=512,
-                 label_drop=0.1, feat_drop=0., attn_drop=0., drop=0.2, 
+                 label_drop=0.1, feat_drop=0., graph_drop=0., attn_drop=0., drop=0.2, 
                  use_sage=True, use_conv=True, use_attn=True, use_resnet=True,
                  use_densenet=True
                 ):
@@ -103,51 +185,57 @@ class UniCMP(nn.Module):
         self.use_resnet = use_resnet
         self.use_densenet = use_densenet
         
-        self.skips = nn.ModuleList()
-        self.graphsage = nn.ModuleList()
-        self.graphconv = nn.ModuleList()
-        self.graphattn = nn.ModuleList()
-        self.gnn_attns = nn.ModuleList()
-        self.norm_layers = nn.ModuleList()
+        if use_sage:
+            self.graphsage = nn.ModuleList()
+            for i in range(num_layers):
+                if i == 0:
+                    self.graphsage.append(GraphSageLayer(input_size, hidden_size, dropout=graph_drop))
+                else:
+                    self.graphsage.append(GraphSageLayer(hidden_size, hidden_size, dropout=graph_drop))
+            
+        if use_conv:
+            self.graphconv = nn.ModuleList()
+            for i in range(num_layers):
+                if i == 0:
+                    self.graphconv.append(GraphConvLayer(input_size, hidden_size, dropout=graph_drop))
+                else:
+                    self.graphconv.append(GraphConvLayer(input_size, hidden_size, dropout=graph_drop))
+                    
+        if use_attn:
+            self.graphattn = nn.ModuleList()
+            for i in range(num_layers):
+                if i == 0:
+                    self.graphattn.append(GraphAttnLayer(input_size, hidden_size // num_heads,
+                                                         num_heads=num_heads, dropout=graph_drop))
+                else:
+                    self.graphattn.append(GraphAttnLayer(hidden_size, hidden_size // num_heads,
+                                                         num_heads=num_heads, dropout=graph_drop))        
+                    
+        if use_densenet:
+            self.graphskip = nn.ModuleList()
+            for i in range(num_layers):
+                for j in range(i + 1):
+                    if j == 0:
+                        self.graphskip.append(ShortCutLayer(input_size, hidden_size, dropout=graph_drop))
+                    else:
+                        self.graphskip.append(ShortCutLayer(hidden_size, hidden_size, dropout=graph_drop))         
+        elif use_resnet:
+            self.graphskip = nn.ModuleList()
+            for i in range(num_layers):
+                if i == 0:
+                    self.graphskip.append(ShortCutLayer(input_size, hidden_size, dropout=graph_drop))
+                else:
+                    self.graphskip.append(ShortCutLayer(hidden_size, hidden_size, dropout=graph_drop))
         
+        self.attn_layers = nn.ModuleList()
         for i in range(num_layers):
-            if i == 0:
-                in_feats = input_size
-            else:
-                in_feats = hidden_size
+            self.attn_layers.append(MultiHeadedAttention(num_heads, hidden_size, attn_drop))
             
-            self.skips.append(nn.Linear(in_feats, hidden_size))
+        self.norm_layers = nn.ModuleList()
+        for i in range(num_layers):
             self.norm_layers.append(LayerNorm(hidden_size))
-            
-            self.graphsage.append(
-                dglnn.SAGEConv(in_feats=in_feats, 
-                               out_feats=hidden_size, 
-                               aggregator_type='lstm'))
-            self.norm_layers.append(LayerNorm(hidden_size))
-            
-            self.graphconv.append(
-                dglnn.GraphConv(in_feats=in_feats,
-                                out_feats=hidden_size,
-                                norm='both'))
-            self.norm_layers.append(LayerNorm(hidden_size))
-            
-            self.graphattn.append(
-                dglnn.GATConv(in_feats=in_feats,
-                              out_feats=hidden_size // num_heads,
-                              num_heads=num_heads,
-                              attn_drop=attn_drop))
-            self.norm_layers.append(LayerNorm(hidden_size))
-  
-            self.gnn_attns.append(MultiHeadedAttention(num_heads, hidden_size, attn_drop))
-            self.norm_layers.append(LayerNorm(hidden_size))
-        
-        self.shortcut = nn.Sequential(
-            nn.Linear(input_size, hidden_size),
-            LayerNorm(hidden_size),
-        )
         
         self.label_embed = nn.Embedding(num_class + 1, input_size, padding_idx=num_class)
-        
         self.feat_mlp = nn.Sequential(
             nn.Linear(2 * input_size, hidden_size),
             LayerNorm(hidden_size),
@@ -163,25 +251,17 @@ class UniCMP(nn.Module):
             nn.Dropout(drop),
             nn.Linear(hidden_size, num_class),
         )
-
-        self.dropout = nn.Dropout(drop)
+        
         self.label_dropout = nn.Dropout(label_drop)
         self.feat_dropout = nn.Dropout(feat_drop)
+        self.dropout = nn.Dropout(drop)
         
         self.reset_parameters()
     
     def reset_parameters(self):
-        for m in self.skips:
-            linear_init_layers(m)
-            
-        for m in self.shortcut:
-            if isinstance(m, nn.Linear):
-                linear_init_layers(m)
-            
         for m in self.feat_mlp:
             if isinstance(m, nn.Linear):
                 gcn_init_layers(m)
-        
         for m in self.head:
             if isinstance(m, nn.Linear):
                 gcn_init_layers(m)
@@ -192,45 +272,37 @@ class UniCMP(nn.Module):
         input_feats = self.feat_dropout(input_feats)
         feature = torch.cat([input_labels, input_feats], dim=1)
         feature = self.feat_mlp(feature)
-
-        h, feat_dst = feature, feature
-        for l in range(self.num_layers):     
-            feat_dst = expand_as_pair(feat_dst, blocks[l])[1]
+        
+        logits = [feature]
+        for l in range(self.num_layers):
             hidden = []
             
-            if self.use_resnet:
-                h1 = expand_as_pair(h, blocks[l])[1]
-                h1 = self.skips[l](h1)
-                h1 = self.norm_layers[5 * l](h1)
-                h1 = F.elu(h1)
-                hidden.append(h1)
-            
             if self.use_sage:
-                h2 = self.graphsage[l](blocks[l], h)
-                h2 = self.norm_layers[5 * l + 1](h2)
-                h2 = F.elu(h2)
-                hidden.append(h2)
-            
+                h1 = self.graphsage[l](blocks[l], logits[-1])
+                hidden.append(h1)
+
             if self.use_conv:
-                h3 = self.graphconv[l](blocks[l], h)
-                h3 = self.norm_layers[5 * l + 2](h3)
-                h3 = F.elu(h3)
-                hidden.append(h3)
-
+                h2 = self.graphconv[l](blocks[l], logits[-1])
+                hidden.append(h2)
+                
             if self.use_attn:
-                h4 = self.graphattn[l](blocks[l], h).flatten(1)
-                h4 = self.norm_layers[5 * l + 3](h4)
-                h4 = F.elu(h4)
-                hidden.append(h4)
+                h3 = self.graphattn[l](blocks[l], logits[-1])
+                hidden.append(h3)
             
-            if self.use_densenet and l == self.num_layers - 1:
-                h5 = self.shortcut(feat_dst)
-                hidden.append(h5)
-
+            logits = [expand_as_pair(tensor, blocks[l])[1] for tensor in logits]
+            if self.use_densenet:
+                for k, tensor in enumerate(logits):
+                    h4 = self.graphskip[l * (l + 1) // 2 + k](tensor)
+                    hidden.append(h4)
+            elif self.use_resnet:
+                h4 = self.graphskip[l](logits[-1])
+                hidden.append(h4)
+        
             h = torch.stack(hidden, dim=1)
-            h = self.gnn_attns[l](h)[:, 0]
-            h = self.norm_layers[5 * l + 4](h)
+            h = self.attn_layers[l](h)[:, 0]
+            h = self.norm_layers[l](h)
             h = self.dropout(h)
+            logits.append(h)
 
-        output = self.head(h)
+        output = self.head(logits[-1])
         return output
