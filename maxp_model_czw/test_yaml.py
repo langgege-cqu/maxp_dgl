@@ -34,10 +34,11 @@ def init_model(model_cfg, device):
         model = UniCMP(input_size=model_cfg['INPUT_SIZE'], num_class=model_cfg['NUM_CLASS'],
                        num_layers=model_cfg['NUM_LAYERS'], num_heads=model_cfg['NUM_HEADS'],
                        hidden_size=model_cfg['HIDDEN_SIZE'], label_drop=model_cfg['LABEL_DROP'],
-                       feat_drop=model_cfg['FEAT_DORP'], attn_drop=model_cfg['ATTN_DROP'],
-                       drop=model_cfg['DROP'], use_sage=model_cfg['USE_SAGE'],
-                       use_conv=model_cfg['USE_CONV'], use_attn=model_cfg['USE_ATTN'],
-                       use_resnet=model_cfg['USE_RESNET'], use_densenet=model_cfg['USE_DESNET'])
+                       feat_drop=model_cfg['FEAT_DORP'], graph_drop=model_cfg['GRAPH_DORP'],
+                       attn_drop=model_cfg['ATTN_DROP'], drop=model_cfg['DROP'], 
+                       use_sage=model_cfg['USE_SAGE'], use_conv=model_cfg['USE_CONV'], 
+                       use_attn=model_cfg['USE_ATTN'], use_resnet=model_cfg['USE_RESNET'], 
+                       use_densenet=model_cfg['USE_DESNET'])
     else:
         raise NotImplementedError('Not support algorithm: {}'.format(model_cfg['GNN_MODEL']))
         
@@ -59,9 +60,15 @@ def get_dataloader(dataset_cfg, graph_data):
 
 
 def load_subtensor(node_feats, labels, seeds, input_nodes, n_classes, device):
+    """
+    Copys features and labels of a set of nodes onto GPU.
+    """
     input_feats = node_feats[input_nodes].to(device)
     
-    input_labels = labels[input_nodes]
+    masklabels = labels.clone()
+    masklabels[seeds] = -1
+    input_labels = masklabels[input_nodes]
+
     input_labels[input_labels < 0] = n_classes
     input_labels = input_labels.to(device)
     
@@ -105,14 +112,14 @@ def test(model_cfg, dataset_cfg, device, graph_data):
     nodes_df = pd.read_csv(nodes_path, dtype={'Label':str})
         
     result = test_epoch(model, test_dataloader, node_feats, labels, model_cfg['NUM_CLASS'], device)
-    result_npy = os.path.join(dataset_cfg['OUT_PATH'], '{}_logits.npy'.format(dataset_cfg['TEST_PREFIX']))
+    result_npy = os.path.join(dataset_cfg['OUT_PATH'], '{}.npy'.format(dataset_cfg['TEST_PREFIX']))
     np.save(result_npy, result)
     df = pd.DataFrame({'node_idx': test_nid, 'label': np.argmax(result, axis=-1)})
         
     df['label'] = df['label'].apply(id2name)
     mged = pd.merge(df, nodes_df[['node_idx', 'paper_id']], on='node_idx', how='left')
     
-    result_csv = os.path.join(dataset_cfg['OUT_PATH'], '{}_result.csv'.format(dataset_cfg['TEST_PREFIX']))
+    result_csv = os.path.join(dataset_cfg['OUT_PATH'], '{}.csv'.format(dataset_cfg['TEST_PREFIX']))
     pd.DataFrame({'id': mged['paper_id'], 'label': mged['label']}).to_csv(result_csv, index=False)
         
 
