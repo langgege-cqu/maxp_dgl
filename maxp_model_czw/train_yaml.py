@@ -42,10 +42,11 @@ def init_model(model_cfg, device):
         model = UniCMP(input_size=model_cfg['INPUT_SIZE'], num_class=model_cfg['NUM_CLASS'],
                        num_layers=model_cfg['NUM_LAYERS'], num_heads=model_cfg['NUM_HEADS'],
                        hidden_size=model_cfg['HIDDEN_SIZE'], label_drop=model_cfg['LABEL_DROP'],
-                       feat_drop=model_cfg['FEAT_DORP'], attn_drop=model_cfg['ATTN_DROP'],
-                       drop=model_cfg['DROP'], use_sage=model_cfg['USE_SAGE'],
-                       use_conv=model_cfg['USE_CONV'], use_attn=model_cfg['USE_ATTN'],
-                       use_resnet=model_cfg['USE_RESNET'], use_densenet=model_cfg['USE_DESNET'])
+                       feat_drop=model_cfg['FEAT_DORP'], graph_drop=model_cfg['GRAPH_DORP'],
+                       attn_drop=model_cfg['ATTN_DROP'], drop=model_cfg['DROP'], 
+                       use_sage=model_cfg['USE_SAGE'], use_conv=model_cfg['USE_CONV'], 
+                       use_attn=model_cfg['USE_ATTN'], use_resnet=model_cfg['USE_RESNET'], 
+                       use_densenet=model_cfg['USE_DESNET'])
     else:
         raise NotImplementedError('Not support algorithm: {}'.format(model_cfg['GNN_MODEL']))
 
