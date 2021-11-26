@@ -89,7 +89,7 @@ class GraphAttnLayer(nn.Module):
     def __init__(self, in_feats, out_feats, num_heads, activation=F.elu, 
                  attn_drop=0, dropout=0):
         super(GraphAttnLayer, self).__init__()
-        self.graph = dglnn.GATConv(in_feats=in_feats, out_feats=out_feats,
+        self.graph = dglnn.GATConv(in_feats=in_feats, out_feats=out_feats // num_heads,
                                    num_heads=num_heads, attn_drop=attn_drop)
         self.norm = LayerNorm(out_feats)
         self.activation = activation
@@ -199,17 +199,17 @@ class UniCMP(nn.Module):
                 if i == 0:
                     self.graphconv.append(GraphConvLayer(input_size, hidden_size, dropout=graph_drop))
                 else:
-                    self.graphconv.append(GraphConvLayer(input_size, hidden_size, dropout=graph_drop))
+                    self.graphconv.append(GraphConvLayer(hidden_size, hidden_size, dropout=graph_drop))
                     
         if use_attn:
             self.graphattn = nn.ModuleList()
             for i in range(num_layers):
                 if i == 0:
-                    self.graphattn.append(GraphAttnLayer(input_size, hidden_size // num_heads,
-                                                         num_heads=num_heads, dropout=graph_drop))
+                    self.graphattn.append(GraphAttnLayer(input_size, hidden_size, num_heads=num_heads, 
+                                                         dropout=graph_drop))
                 else:
-                    self.graphattn.append(GraphAttnLayer(hidden_size, hidden_size // num_heads,
-                                                         num_heads=num_heads, dropout=graph_drop))        
+                    self.graphattn.append(GraphAttnLayer(hidden_size, hidden_size, num_heads=num_heads, 
+                                                         dropout=graph_drop))        
                     
         if use_densenet:
             self.graphskip = nn.ModuleList()
