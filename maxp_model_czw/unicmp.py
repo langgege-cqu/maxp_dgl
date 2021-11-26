@@ -90,7 +90,7 @@ class GraphAttnLayer(nn.Module):
                  attn_drop=0, dropout=0):
         super(GraphAttnLayer, self).__init__()
         self.graph = dglnn.GATConv(in_feats=in_feats, out_feats=out_feats,
-                                   num_heads=num_heads, attn_drop=attn_dropout)
+                                   num_heads=num_heads, attn_drop=attn_drop)
         self.norm = LayerNorm(out_feats)
         self.activation = activation
         self.dropout = nn.Dropout(dropout)
