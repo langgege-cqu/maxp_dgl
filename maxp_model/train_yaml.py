@@ -14,14 +14,14 @@ import dgl
 from dgl.dataloading.neighbor import MultiLayerNeighborSampler
 from dgl.dataloading.pytorch import NodeDataLoader
 from torch import optim
-from models import GraphSageModel, GraphConvModel, GraphAttnModel, GraphModel
-from unimp import GNNModel
+from models.model import GraphSageModel, GraphConvModel, GraphAttnModel, GraphModel
+from models.unimp import GNNModel, UnimpPlus
 from utils import load_dgl_graph
 from optimization import OptimAdam
-from APPNP import APPNP
+from models.APPNP import APPNP
+from loss import LabelSmoothSoftmaxCEV1
 
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 th.cuda.set_device(0)
 
 
@@ -71,6 +71,8 @@ def init_model(model_cfg, in_feat, device):
                            attn_drop=model_cfg['ATTN_DROP'])
     elif model_cfg['GNN_MODEL'] == 'unimp':
         model = GNNModel(input_size=model_cfg['IN_FEAT'], num_class=model_cfg['N_CLASS'])
+    elif model_cfg['GNN_MODEL'] == 'unimpplus':
+        model = UnimpPlus(input_size=model_cfg['IN_FEAT'], num_class=model_cfg['N_CLASS'])
     elif model_cfg['GNN_MODEL'] == 'APPNP':
         model = APPNP(input_size=model_cfg['IN_FEAT'], num_class=model_cfg['N_CLASS'])    
     else:
@@ -139,7 +141,7 @@ def load_subtensor(node_feats, labels, seeds, input_nodes, n_classes, device, tr
     if training:
         rd_m = th.rand(input_labels.shape[0]) 
         rd_y = th.randint(0, n_classes, size=input_labels.shape)
-        input_labels[rd_m < 0.12] = -1
+        input_labels[rd_m < 0.15] = -1
         input_labels[rd_m > 0.97] = rd_y[rd_m > 0.97]
 
     input_labels[input_labels < 0] = n_classes
@@ -234,7 +236,7 @@ def train(model_cfg, dataset_cfg, device, graph_data):
     # optimizer = prep_optimizer(dataset_cfg, model, num_train_optimization_steps)
     optimizer = optim.Adam(model.parameters(), lr=dataset_cfg['LEARNING_RATE'], weight_decay=dataset_cfg['WEIGHT_DECAY'])
     criterion = thnn.CrossEntropyLoss().to(device)
-
+    # criterion = LabelSmoothSoftmaxCEV1().to(device)
     output_folder = dataset_cfg['OUT_PATH']
     os.makedirs(output_folder, exist_ok=True)
     
@@ -250,7 +252,7 @@ def train(model_cfg, dataset_cfg, device, graph_data):
         if val_acc > best_records[1]:
             best_records = [epoch + 1, val_acc]
             
-        model_path = os.path.join(output_folder, 'se_norm_drop0.1_decay0.1_dgl_model_epoch{:02d}'.format(epoch + 1) + '_val_{:.4f}'.format(val_acc)+'.pth')
+        model_path = os.path.join(output_folder, 'new_embedding_unimp_label0.15_drop0.3_decay0.2_dgl_model_epoch{:02d}'.format(epoch + 1) + '_val_{:.4f}'.format(val_acc)+'.pth')
         th.save(model.state_dict(), model_path)
     
     logging.info("Best Epoch %d | Val Acc: %f ", best_records[0], best_records[1])

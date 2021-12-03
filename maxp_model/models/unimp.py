@@ -82,7 +82,7 @@ class Mul(nn.Module):
         
         # features_1 = torch.nn.functional.normalize(features_1, p=2, dim=1)
         # features_2 = torch.nn.functional.normalize(features_2, p=2, dim=1)
-        # features_3 = torch.nn.functional.normalize(features_3, p=2, dim=1)
+        # features_3 = torch.nn.functional.normalize(fetures_3, p=2, dim=1)
         
         features = features_1 * weight_1 + features_2 * weight_2 
 
@@ -143,7 +143,156 @@ class GNNModel(nn.Module):
         self.gnn_attns = nn.ModuleList()
         self.norm_layers = nn.ModuleList()
         self.mul = Mul(hidden_size, hidden_size)
+        self.se = Se(hidden_size*2, hidden_size)
+        
+        
+        for i in range(num_layers):
+            if i == 0:
+                in_feats = input_size
+            else:
+                in_feats = hidden_size
+            
+            self.skips.append(nn.Linear(in_feats, hidden_size))
+            self.norm_layers.append(LayerNorm(hidden_size))
+            
+            self.graphsage.append(
+                dglnn.SAGEConv(in_feats=in_feats, 
+                               out_feats=hidden_size, 
+                               aggregator_type='lstm'))
+            self.norm_layers.append(LayerNorm(hidden_size))
+            
+            self.graphconv.append(
+                dglnn.GraphConv(in_feats=in_feats,
+                                out_feats=hidden_size,
+                                norm='both'))
+            self.norm_layers.append(LayerNorm(hidden_size))
+            
+            self.graphattn.append(
+                dglnn.GATConv(in_feats=in_feats,
+                              out_feats=hidden_size // num_heads,
+                              num_heads=num_heads,
+                              attn_drop=attn_drop))
+            self.norm_layers.append(LayerNorm(hidden_size))
+            
+            self.gnn_attns.append(nn.Linear(hidden_size, 1))
+            self.norm_layers.append(LayerNorm(hidden_size))
 
+            # self.mul.append(Mul(hidden_size, hidden_size))
+            
+        self.label_embed = nn.Sequential(
+            nn.Embedding(num_class + 1, input_size, padding_idx=num_class),
+            nn.Linear(input_size, input_size)
+        )
+        self.feat_mlp = nn.Sequential(
+            nn.Linear(2 * input_size, hidden_size),
+            LayerNorm(hidden_size),
+            nn.ReLU(),
+            nn.Dropout(drop),
+            nn.Linear(hidden_size, input_size),
+        )
+        
+        self.head = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            LayerNorm(hidden_size),
+            nn.ReLU(),
+            nn.Dropout(drop),
+            nn.Linear(hidden_size, num_class),
+        )
+        self.fc = nn.Linear(hidden_size, num_class)
+
+        self.dropout = nn.Dropout(drop)
+        self.label_dropout = nn.Dropout(label_drop)
+        self.feat_dropout = nn.Dropout(feat_drop)
+        
+        self.reset_parameters()
+    
+    def reset_parameters(self):
+        for m in self.skips:
+            linear_init_layers(m)
+        
+        for m in self.gnn_attns:
+            linear_init_layers(m)
+            
+        for m in self.feat_mlp:
+            if isinstance(m, nn.Linear):
+                gcn_init_layers(m)
+        
+        for m in self.head:
+            if isinstance(m, nn.Linear):
+                gcn_init_layers(m)
+                
+        
+    def forward(self, blocks, input_feats, input_labels):
+        input_labels = self.label_embed(input_labels)
+        input_labels = self.label_dropout(input_labels)
+        
+        input_feats = self.feat_dropout(input_feats)
+        
+        feature = torch.cat([input_labels, input_feats], dim=1)
+        feature = self.feat_mlp(feature)
+        # feature = input_feats + input_labels
+
+        h = feature
+        h2 = h
+        # h3 = h
+        for l in range(self.num_layers):  
+            h2 = self.graphsage[l](blocks[l], h2)
+            h2 = self.norm_layers[5 * l + 1](h2)
+            h2 = F.elu(h2)
+
+            # h3 = self.graphconv[l](blocks[l], h3)
+            # h3 = self.norm_layers[5 * l + 2](h3)
+            # h3 = F.elu(h3) 
+
+        for l in range(self.num_layers):     
+            h1 = expand_as_pair(h, blocks[l])[1]
+            h1 = self.skips[l](h1)
+            h1 = self.norm_layers[5 * l](h1)
+            h1 = F.elu(h1)
+            
+            
+            # h3 = self.graphconv[l](blocks[l], h)
+            # h3 = self.norm_layers[5 * l + 2](h3)
+            # h3 = F.elu(h3)
+            
+            h4 = self.graphattn[l](blocks[l], h).flatten(1)
+            h4 = self.norm_layers[5 * l + 3](h4)
+            h4 = F.elu(h4)
+            
+            # h = torch.stack([h1, h2, h3, h4], dim=1)
+            h = torch.cat([h1, h4], dim=1)
+            # attn_weights = F.softmax(self.gnn_attns[l](h), dim=1)
+            # attn_weights = attn_weights.transpose(-1, -2)
+            # h = torch.bmm(attn_weights, h)[:, 0]
+            # 上面是unimp模型的残差连接
+            # 下面是se的残差连接
+            # h = self.mul[l](h1, h2, h4)
+            attn_weights = self.se(h)
+            h = h4 * attn_weights + h1 * (1 - attn_weights)
+            h = self.norm_layers[5 * l + 4](h)
+            h = self.dropout(h)
+
+        h = self.mul(h2, h)
+        output = self.head(h)
+        return output
+
+
+
+class UnimpPlus(nn.Module):
+
+    def __init__(self, input_size, num_class, num_layers=2, num_heads=4, hidden_size=512,
+                 label_drop=0.3, feat_drop=0., attn_drop=0., drop=0.1):
+        super(UnimpPlus, self).__init__()
+        self.num_layers = num_layers
+        
+        self.skips = nn.ModuleList()
+        self.graphsage = nn.ModuleList()
+        self.graphconv = nn.ModuleList()
+        self.graphattn = nn.ModuleList()
+        self.gnn_attns = nn.ModuleList()
+        self.norm_layers = nn.ModuleList()
+        self.mul = Mul(hidden_size, hidden_size)
+        self.se = Se(hidden_size*2, hidden_size)
         
         
         for i in range(num_layers):
@@ -225,15 +374,20 @@ class GNNModel(nn.Module):
         
         input_feats = self.feat_dropout(input_feats)
         
-        feature = torch.cat([input_labels, input_feats], dim=1)
-        feature = self.feat_mlp(feature)
+        
+        # feature = input_feats + input_labels
 
-        h = feature
-        h2 = h
+        h = input_feats
+        h2 = input_labels
+        # h3 = h
         for l in range(self.num_layers):  
             h2 = self.graphsage[l](blocks[l], h2)
             h2 = self.norm_layers[5 * l + 1](h2)
-            h2 = F.elu(h2) 
+            h2 = F.elu(h2)
+
+            # h3 = self.graphconv[l](blocks[l], h3)
+            # h3 = self.norm_layers[5 * l + 2](h3)
+            # h3 = F.elu(h3) 
 
         for l in range(self.num_layers):     
             h1 = expand_as_pair(h, blocks[l])[1]
@@ -251,16 +405,17 @@ class GNNModel(nn.Module):
             h4 = F.elu(h4)
             
             # h = torch.stack([h1, h2, h3, h4], dim=1)
-            h = torch.stack([h1, h4], dim=1)
-            attn_weights = F.softmax(self.gnn_attns[l](h), dim=1)
-            attn_weights = attn_weights.transpose(-1, -2)
-            h = torch.bmm(attn_weights, h)[:, 0]
+            h = torch.cat([h1, h4], dim=1)
+            # attn_weights = F.softmax(self.gnn_attns[l](h), dim=1)
+            # attn_weights = attn_weights.transpose(-1, -2)
+            # h = torch.bmm(attn_weights, h)[:, 0]
             # 上面是unimp模型的残差连接
             # 下面是se的残差连接
             # h = self.mul[l](h1, h2, h4)
-            
+            attn_weights = self.se(h)
+            h = h4 * attn_weights + h1 * (1 - attn_weights)
             h = self.norm_layers[5 * l + 4](h)
-            h = self.dropout(h)
+            # h = self.dropout(h)
 
         h = self.mul(h2, h)
         output = self.head(h)

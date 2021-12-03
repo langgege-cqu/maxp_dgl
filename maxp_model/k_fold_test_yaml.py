@@ -17,8 +17,7 @@ from models.unimp import GNNModel, UnimpPlus
 from models.unicmp import UniCMP
 from utils import load_dgl_graph
 
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 th.cuda.set_device(0)
 
 
@@ -39,7 +38,7 @@ def set_seed_logger(dataset_cfg):
     os.makedirs(dataset_cfg['OUT_PATH'], exist_ok=True)
 
     
-def init_model(model_cfg, in_feat, device):
+def init_model(model_cfg, k_fold, device):
     if model_cfg['GNN_MODEL'] == 'graphsage':
         model = GraphModel(1, model_cfg['IN_FEAT'], model_cfg['HIDDEN_DIM'], model_cfg['N_LAYERS'], model_cfg['MLP_DIM'],
                            num_attention_heads=model_cfg['NUM_ATTENTION_HEADS'], n_classes=model_cfg['N_CLASS'],
@@ -80,7 +79,7 @@ def init_model(model_cfg, in_feat, device):
         raise NotImplementedError('So far, only support three algorithms: GraphSage, GraphConv, and GraphAttn')
  
 
-    checkpoint = th.load(model_cfg['CHECKPOINT'])  # map_location='cpu'
+    checkpoint = th.load(model_cfg['CHECKPOINTS'][k_fold])  # map_location='cpu'
     model.load_state_dict(checkpoint)
  
     model = model.to(device)
@@ -109,7 +108,7 @@ def load_subtensor(node_feats, labels, seeds, input_nodes, n_classes, device, tr
     if training:
         rd_m = th.rand(input_labels.shape[0]) 
         rd_y = th.randint(0, n_classes, size=input_labels.shape)
-        input_labels[rd_m < 0.12] = -1
+        input_labels[rd_m < 0.13] = -1
         input_labels[rd_m > 0.97] = rd_y[rd_m > 0.97]
 
     input_labels[input_labels < 0] = n_classes
@@ -132,8 +131,8 @@ def test_epoch(model, test_dataloader, node_feats, labels, n_classes, device):
                                                                      n_classes, device, training=False)
             blocks = [block.to(device) for block in blocks]
             batch_logits = model(blocks, input_feats, input_labels)
-            batch_results = th.argmax(batch_logits, dim=1)
-            result.extend(batch_results.detach().cpu().numpy().tolist())
+            batch_logits = F.softmax(batch_logits, dim=-1)
+            result.extend(batch_logits.detach().cpu().numpy().tolist())
 
     return result
  
@@ -147,16 +146,18 @@ def test(model_cfg, dataset_cfg, device, graph_data):
     graph, labels, train_nid, val_nid, test_nid, node_feats = graph_data
         
     test_dataloader, node_feats, labels = get_dataloader(dataset_cfg, graph_data)
-
-    in_feat = node_feats.shape[1]
-    model = init_model(model_cfg, in_feat, device)
-    print('  Model = %s', str(model))
- 
+    k_fold_result = []
+    for k_fold in range(len(model_cfg['CHECKPOINTS'])):
+        model = init_model(model_cfg, k_fold, device)
+        result = test_epoch(model, test_dataloader, node_feats, labels, model_cfg['N_CLASS'], device)
+        k_fold_result.append(result)
+    k_fold_result = np.array(k_fold_result)
+    k_fold_result = np.sum(k_fold_result, axis=0)
+    result = np.argmax(k_fold_result, axis=1)
     nodes_path = os.path.join(dataset_cfg['DATA_PATH'], 'IDandLabels.csv')
     nodes_df = pd.read_csv(nodes_path, dtype={'Label':str})
     
     
-    result = test_epoch(model, test_dataloader, node_feats, labels, model_cfg['N_CLASS'], device)
     df = pd.DataFrame({'node_idx': test_nid, 'label': result})
     for row in df.itertuples():
         node_idx = getattr(row, 'node_idx')
@@ -164,7 +165,7 @@ def test(model_cfg, dataset_cfg, device, graph_data):
         labels[node_idx] = label
     df['label'] = df['label'].apply(id2name)
     mged = pd.merge(df, nodes_df[['node_idx', 'paper_id']], on='node_idx', how='left')
-    result_csv = dataset_cfg['TEST_RESULT']
+    result_csv = dataset_cfg['K_FOLD_PATH']
     pd.DataFrame({'id': mged['paper_id'], 'label': mged['label']}).to_csv(result_csv, index=False)
         
 
