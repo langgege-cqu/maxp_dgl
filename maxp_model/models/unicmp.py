@@ -191,7 +191,7 @@ class Mul(nn.Module):
             self.se.append(Se(feature_size_1 * h, feature_size_2))
     
     def forward(self, features):
-        # features_1 = torch.nn.functional.normalize(features_1, p=2, dim=1)
+        # features = torch.nn.functional.normalize(features, p=2, dim=2)
         b, l, dim = features.shape
         se_features = torch.reshape(features, (b, -1))
         weight = []
@@ -264,7 +264,7 @@ class UniCMP(nn.Module):
             self.attn_layers.append(MultiHeadedAttention(num_heads, hidden_size, attn_drop))
         self.se_mul_layers = nn.ModuleList()
         for i in range(num_layers):
-            self.se_mul_layers.append(Mul(i+3, hidden_size, hidden_size))
+            self.se_mul_layers.append(Mul(i+2, hidden_size, hidden_size))
 
         self.norm_layers = nn.ModuleList()
         for i in range(num_layers):

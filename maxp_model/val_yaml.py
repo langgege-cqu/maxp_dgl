@@ -21,6 +21,7 @@ from models.unicmp import UniCMP
 from utils import load_dgl_graph
 from optimization import OptimAdam
 
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 th.cuda.set_device(0)
 
@@ -87,6 +88,9 @@ def init_model(model_cfg, in_feat, device):
                        use_densenet=model_cfg['USE_DESNET'])
     else:
         raise NotImplementedError('So far, only support three algorithms: GraphSage, GraphConv, and GraphAttn')
+    
+    checkpoint = th.load(model_cfg['CHECKPOINT'])  # map_location='cpu'
+    model.load_state_dict(checkpoint)
     model = model.to(device)
     return model
 
@@ -170,7 +174,7 @@ def train_epoch(epoch, model, train_dataloader, node_feat, labels, optimizer, cr
     for step, (input_nodes, seeds, blocks) in enumerate(train_dataloader):
         # forward
         input_feats, input_labels, batch_labels = load_subtensor(node_feat, labels, seeds, input_nodes,
-                                                                 n_classes, device, training=False)
+                                                                 n_classes, device, training=True)
         blocks = [block.to(device) for block in blocks]
         # metric and loss
         train_batch_logits = model(blocks, input_feats, input_labels)
@@ -250,21 +254,9 @@ def train(model_cfg, dataset_cfg, device, graph_data):
     os.makedirs(output_folder, exist_ok=True)
     
     global_step, best_records = 0, [-1, 0.0]
-    for epoch in range(dataset_cfg['EPOCHS']):
-        tr_loss, tr_acc, global_step = train_epoch(epoch, model, train_dataloader, node_feat, labels, optimizer, criterion,
-                                                   model_cfg['N_CLASS'], device, global_step, dataset_cfg['LOG_STEP'])
-        logging.info("Train Epoch %d/%s Finished | Train Loss: %f | Train Acc: %f ", epoch + 1, dataset_cfg['EPOCHS'], tr_loss, tr_acc)
-
+    for epoch in range(1):
         val_loss, val_acc = val_epoch(model, val_dataloader, node_feat, labels, criterion, model_cfg['N_CLASS'], device)
         logging.info("Val Epoch %d/%s Finished | Val Loss: %f | Val Acc: %f ", epoch + 1, dataset_cfg['EPOCHS'], val_loss, val_acc)
-
-        if val_acc > best_records[1]:
-            best_records = [epoch + 1, val_acc]
-            
-        model_path = os.path.join(output_folder, '2_gat_dgl_model_epoch{:02d}'.format(epoch + 1)+'_valloss_{:.4f}'.format(val_loss) + '_val_{:.4f}'.format(val_acc)+'.pth')
-        th.save(model.state_dict(), model_path)
-    
-    logging.info("Best Epoch %d | Val Acc: %f ", best_records[0], best_records[1])
 
 
 if __name__ == '__main__':

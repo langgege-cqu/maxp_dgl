@@ -182,3 +182,5 @@ if __name__ == '__main__':
     graph_data = load_dgl_graph(dataset_cfg['DATA_PATH'], k_fold, norm_feature=dataset_cfg['NORM_FEATURE'])
         
     test(model_cfg, dataset_cfg, device, graph_data)
+
+

@@ -12,19 +12,19 @@ MODEL:
   ATTN_DROP: 0.
   GRAPH_DORP: 0.
   LABEL_DROP: 0.25
-  FEAT_DORP: 0.05
-  USE_SAGE: True
+  FEAT_DORP: 0.
+  USE_SAGE: False
   USE_CONV: False
   USE_ATTN: True
   USE_RESNET: True
   USE_DESNET: True
-  CHECKPOINT: graphmodel/split2/lstm_unicmp_dgl_model_epoch18_valloss_1.2208_val_0.6248.pth
-  CHECKPOINTS: [graphmodel/split0/new_3_unicmp_dgl_model_epoch21_valloss_1.2149_val_0.6273.pth, graphmodel/split1/new_3_unicmp_dgl_model_epoch20_valloss_1.2227_val_0.6234.pth, graphmodel/split2/new_3_unicmp_dgl_model_epoch16_valloss_1.2067_val_0.6259.pth, graphmodel/split3/new_3_unicmp_dgl_model_epoch15_valloss_1.2150_val_0.6227.pth]
+  CHECKPOINT: graphmodel/split2/norm_lstm_unicmp_dgl_model_epoch21_valloss_1.2181_val_0.6263.pth
+  CHECKPOINTS: [graphmodel/split0/lstm_768_unicmp_dgl_model_epoch13_valloss_1.2166_val_0.6262.pth, graphmodel/split1/lstm_768_unicmp_dgl_model_epoch12_valloss_1.2190_val_0.6216.pth, graphmodel/split2/lstm_768_unicmp_dgl_model_epoch12_valloss_1.2126_val_0.6252.pth, graphmodel/split3/lstm_768_unicmp_dgl_model_epoch15_valloss_1.2315_val_0.6213.pth]
 
 DATASET:
   DATA_PATH: ../data/
   BATCH_SIZE: 512
-  EPOCHS: 20
+  EPOCHS: 30
   LEARNING_RATE: 0.0001
   COEF_LR: 0.8
   WEIGHT_DECAY: 0.0001  #0.0005
@@ -37,5 +37,5 @@ DATASET:
   NORM_FEATURE: False
   K_FOLD: 2 #[0, 1, 2, 3, 4]
   OUT_PATH: graphmodel/split
-  TEST_RESULT: test_result/split2_lstm_unicmp_dgl_model_epoch18_valloss_1.2208_val_0.6248_result.csv
-  K_FOLD_PATH: test_result/new_acc_unicmp_k_fold_4.csv
+  TEST_RESULT: test_result/split2_norm_lstm_unicmp_dgl_model_epoch21_valloss_1.2181_val_0.6263_result.csv
+  K_FOLD_PATH: test_result/se_lstm768_unicmp_k_fold_4.csv
