@@ -289,6 +289,6 @@ if __name__ == '__main__':
 
     device = th.device('cuda') if th.cuda.is_available() else th.device('cpu')
     dataset_cfg['BATCH_SIZE'] = int(dataset_cfg['BATCH_SIZE'] / dataset_cfg['GRADIENT_ACCUMULATION_STEPS'])
-    graph_data = load_dgl_graph(dataset_cfg['DATA_PATH'], norm_feature=dataset_cfg['NORM_FEATURE'])
+    graph_data = load_dgl_graph(dataset_cfg['DATA_PATH'])
 
     train(model_cfg, dataset_cfg, optimizer_cfg, criterion_cfg, device, graph_data)
