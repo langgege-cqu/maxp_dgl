@@ -5,14 +5,16 @@ import numpy as np
 import torch as th
 
 
-def load_dgl_graph(base_path, norm_feature=False):
-    """
-    读取预处理的Graph，Feature和Label文件，并构建相应的数据供训练代码使用。
+def minMaxScaling(data):
+    mind, maxd = data.min(), data.max()
+    return mind + (data - mind) / (maxd - mind)
 
-    :param base_path:
-    :return:
-    """
+
+def load_dgl_graph(base_path):
     graphs, _ = dgl.load_graphs(os.path.join(base_path, 'graph.bin'))
+    edge_feat = th.cat((minMaxScaling(graphs[0].in_degrees().unsqueeze_(1).float().add(1).log()), 
+                        minMaxScaling(graphs[0].out_degrees().unsqueeze_(1).float().add(1).log())), dim=1)
+
     graph = graphs[0]
     graph = dgl.to_bidirected(graph, copy_ndata=True)
     graph = dgl.add_self_loop(graph)
@@ -32,22 +34,15 @@ def load_dgl_graph(base_path, norm_feature=False):
     print('             Validation label number: {}'.format(val_label_idx.shape[0]))
     print('                   Test label number: {}'.format(test_label_idx.shape[0]))
 
-    # get node features
-    features = np.load(os.path.join(base_path, 'features.npy'))
-    node_feat = th.from_numpy(features).float()
+    node_feat = th.from_numpy(np.load(os.path.join(base_path, 'features.npy'))).float()
+    walk_feat = th.from_numpy(np.load(os.path.join(base_path, 'deepwalk.npy'))).float()
+    
+    features = th.cat((node_feat, walk_feat, edge_feat), dim=1)
+    
     print('################ Feature info: ###############')
     print('Node\'s feature shape:{}'.format(node_feat.shape))
+    print('Walk\'s feature shape:{}'.format(walk_feat.shape))
+    print('Edge\'s feature shape:{}'.format(edge_feat.shape))
     
-    
-    if norm_feature:
-        node_feat = th.nn.functional.normalize(node_feat, p=2.0, dim=-1)
-        
-        degs = graph.out_degrees().float().clamp(min=1)
-        norm = th.pow(degs, -0.5)
-        shp = norm.shape + (1,) * (node_feat.dim() - 1)
-        norm = th.reshape(norm, shp)
-        node_feat = node_feat * norm
-        print('Norm Feature Succeed')
-    
-    graph_data = (graph, labels, tr_label_idx, val_label_idx, test_label_idx, node_feat)
+    graph_data = (graph, labels, tr_label_idx, val_label_idx, test_label_idx, features)
     return graph_data
