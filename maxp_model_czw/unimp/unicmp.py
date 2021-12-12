@@ -178,6 +178,7 @@ class UniCMP(nn.Module):
                  use_densenet=True
                 ):
         super(UniCMP, self).__init__()
+        self.input_size = input_size
         self.num_layers = num_layers
         self.use_sage = use_sage
         self.use_conv = use_conv
@@ -237,7 +238,7 @@ class UniCMP(nn.Module):
         
         self.label_embed = nn.Embedding(num_class + 1, input_size, padding_idx=num_class)
         self.feat_mlp = nn.Sequential(
-            nn.Linear(2 * input_size, hidden_size),
+            nn.Linear(2 * input_size + 2 + 128, hidden_size),
             LayerNorm(hidden_size),
             nn.ReLU(),
             nn.Dropout(drop),
@@ -269,8 +270,10 @@ class UniCMP(nn.Module):
     def forward(self, blocks, input_feats, input_labels):
         input_labels = self.label_embed(input_labels)
         input_labels = self.label_dropout(input_labels)
-        input_feats = self.feat_dropout(input_feats)
-        feature = torch.cat([input_labels, input_feats], dim=1)
+        
+        node_feats, graph_feats = input_feats[:, :self.input_size], input_feats[:, self.input_size:]
+        node_feats = self.feat_dropout(node_feats)
+        feature = torch.cat([input_labels, node_feats, graph_feats], dim=1)
         feature = self.feat_mlp(feature)
         
         logits = [feature]
