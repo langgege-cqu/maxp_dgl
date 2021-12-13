@@ -1,4 +1,4 @@
 /data
-/maxp_model/graphmodel
-/maxp_model/test_result
+graphmodel
+test_result
 __pycache__
