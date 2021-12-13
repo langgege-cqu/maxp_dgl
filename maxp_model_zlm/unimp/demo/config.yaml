@@ -36,7 +36,8 @@ CRITERION:
 
 DATASET:
   SEED: 2021
-  DATA_PATH: ../dataset/split2
+  DATA_PATH: ../dataset
+  K_FOLD: 2 #[0, 1, 2, 3, 4]
   EPOCHS: 50
   BATCH_SIZE: 1600
   LOG_STEP: 200

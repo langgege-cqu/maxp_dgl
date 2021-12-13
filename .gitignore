@@ -1,4 +1,6 @@
 /data
+dgl_model
+dataset
 graphmodel
 test_result
 __pycache__
