@@ -343,6 +343,7 @@ def train(model_cfg, dataset_cfg, optimizer_cfg, criterion_cfg, device, graph_da
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Graph Node Classification')
     parser.add_argument('--cfg_file', type=str, default='config.yaml', help="Path of config files.")
+    parser.add_argument('--k_fold', type=int, default=0, help="k_fold")
     args = parser.parse_args()
     yaml_path = args.cfg_file
 
@@ -352,10 +353,11 @@ if __name__ == '__main__':
     dataset_cfg = config['DATASET']
     optimizer_cfg = config['OPTIMIZER']
     criterion_cfg = config['CRITERION']
+    dataset_cfg['K_FOLD'] = args.k_fold
 
-    output_folder = dataset_cfg['OUT_PATH']
-    os.makedirs(output_folder, exist_ok=True)
-    os.system('cp {} {}/config.yaml'.format(yaml_path, output_folder))
+    dataset_cfg['OUT_PATH'] = dataset_cfg['OUT_PATH'] + str(dataset_cfg['K_FOLD'])
+    os.makedirs(dataset_cfg['OUT_PATH'], exist_ok=True)
+    os.system('cp {} {}/config.yaml'.format(yaml_path, dataset_cfg['OUT_PATH']))
 
     device = th.device('cuda') if th.cuda.is_available() else th.device('cpu')
     dataset_cfg['BATCH_SIZE'] = int(dataset_cfg['BATCH_SIZE'] / dataset_cfg['GRADIENT_ACCUMULATION_STEPS'])

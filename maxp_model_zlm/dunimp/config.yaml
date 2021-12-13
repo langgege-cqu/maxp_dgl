@@ -53,6 +53,6 @@ DATASET:
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
   NORM_FEATURE: False
-  OUT_PATH: ../dgl_model/dunicmp/unicmp_split2
+  OUT_PATH: ../dgl_model/dunicmp/unicmp_split
   MODEL_PREFIX: unicmp_split2
   TEST_PREFIX: unicmp_split2
