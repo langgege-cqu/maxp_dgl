@@ -39,9 +39,11 @@ DATASET:
   DATA_PATH: ../dataset
   K_FOLD: 2 #[0, 1, 2, 3, 4]
   EPOCHS: 50
-  BATCH_SIZE: 1024
+  BATCH_SIZE: 2048
   LOG_STEP: 200
   FANOUTS: [30, 30]
+  IN_FANOUTS: [25, 25]
+  OUT_FANOUTS: [25, 25]
   NUM_CLASS: 23
   REPLACE_LABEL: 0.04
   MASK_LABEL: 0.16
@@ -49,6 +51,6 @@ DATASET:
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
   NORM_FEATURE: False
-  OUT_PATH: ../dgl_model/unicmp/unicmp_split2
+  OUT_PATH: ../dgl_model/dunicmp/unicmp_split2
   MODEL_PREFIX: unicmp_split2
   TEST_PREFIX: unicmp_split2
