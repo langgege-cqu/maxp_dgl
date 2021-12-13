@@ -20,6 +20,8 @@ from util import load_dgl_graph
 from optimization import OptimAdam
 from loss import LabelSmoothingLoss, AsymmetricLoss
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 
 def set_seed_logger(dataset_cfg):
     random.seed(dataset_cfg['SEED'])
@@ -357,7 +359,6 @@ if __name__ == '__main__':
 
     device = th.device('cuda') if th.cuda.is_available() else th.device('cpu')
     dataset_cfg['BATCH_SIZE'] = int(dataset_cfg['BATCH_SIZE'] / dataset_cfg['GRADIENT_ACCUMULATION_STEPS'])
-    k_fold = dataset_cfg['K_FOLD']
-    graph_data = load_dgl_graph(dataset_cfg['DATA_PATH'], k=k_fold, to_bidirected=False)
+    graph_data = load_dgl_graph(dataset_cfg)
 
     train(model_cfg, dataset_cfg, optimizer_cfg, criterion_cfg, device, graph_data)
