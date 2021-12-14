@@ -88,7 +88,7 @@ class GraphAttnLayer(nn.Module):
 
     def __init__(self, in_feats, out_feats, num_heads, activation=F.elu, attn_drop=0, dropout=0):
         super(GraphAttnLayer, self).__init__()
-        self.graph = dglnn.GATConv(
+        self.graph = dglnn.GATv2Conv(
             in_feats=in_feats, out_feats=out_feats // num_heads, num_heads=num_heads, attn_drop=attn_drop
         )
         self.norm = LayerNorm(out_feats)
@@ -255,7 +255,7 @@ class UniCMP(nn.Module):
 
         self.label_embed = nn.Embedding(num_class + 1, input_size, padding_idx=num_class)
         self.feat_mlp = nn.Sequential(
-            nn.Linear(2 * input_size + 2 + 128, hidden_size),
+            nn.Linear(2 * input_size + 2 + 8 + 128, hidden_size),
             LayerNorm(hidden_size),
             nn.ReLU(),
             nn.Dropout(drop),

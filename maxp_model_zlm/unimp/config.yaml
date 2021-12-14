@@ -10,12 +10,13 @@ MODEL:
   GRAPH_DORP: 0.0
   ATTN_DROP: 0.0
   DROP: 0.2
+  # GAT_VERSION: 'v2' #v1
   USE_SAGE: True
   USE_CONV: False
   USE_ATTN: True
   USE_RESNET: True
   USE_DESNET: True
-  CHECKPOINT: '../dgl_model/unicmp_gatv1/unicmp_split0/models/unicmp_split_epoch27_val6331.pth'
+  CHECKPOINT: ''
 
 
 OPTIMIZER:
@@ -44,7 +45,7 @@ DATASET:
   BATCH_SIZE: 1024
   BIDIRECTED: True
   LOG_STEP: 200
-  SAMPLER: in #in_out
+  SAMPLER: in #in_out #in
   FANOUTS: [30, 30]
   IN_FANOUTS: [15, 15]
   OUT_FANOUTS: [15, 15]
@@ -55,6 +56,6 @@ DATASET:
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
   NORM_FEATURE: False
-  OUT_PATH: ../dgl_model/unicmp_gatv1/unicmp_split
-  MODEL_PREFIX: unicmp_split
+  OUT_PATH: ../dgl_model/unicmp_gatv2_neigh/unicmp_split
+  MODEL_PREFIX: unicmp_gat2
   TEST_PREFIX: unicmp_gatv1

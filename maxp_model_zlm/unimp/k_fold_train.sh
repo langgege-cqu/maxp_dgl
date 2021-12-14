@@ -1,7 +1,7 @@
-train_name='first_try'
+train_name='gatv2_neigh'
 file_name='train_yaml.py'
 log_dir='log'
-device=(0 1 5 6 7)
+device=(1 2 5 6 7)
 fold=(0 1 2 3 4)
 # 关闭所有之前运行的程序
 ps -ef | grep "python "$file_name | cut -c 9-15 | xargs kill -s 9

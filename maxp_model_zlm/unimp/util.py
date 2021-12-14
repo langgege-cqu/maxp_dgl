@@ -55,8 +55,8 @@ def load_dgl_graph(dataset_cfg):
     node_feat = th.from_numpy(np.load(os.path.join(base_path, 'features.npy'))).float()
     walk_feat = th.from_numpy(np.load(os.path.join(base_path, dataset_cfg['DEEPWALK_PATH']))).float()
     neighbor_feat = th.from_numpy(np.load(os.path.join(base_path, dataset_cfg['NEIGHBOR_FEATURES_PATH']))).float()
-    # features = th.cat((node_feat, walk_feat, edge_feat, neighbor_feat), dim=1)
-    features = th.cat((node_feat, walk_feat, edge_feat), dim=1)
+    features = th.cat((node_feat, walk_feat, edge_feat, neighbor_feat), dim=1)
+    # features = th.cat((node_feat, walk_feat, edge_feat), dim=1)
 
     print('################ Feature info: ###############')
     print('Node\'s feature shape:{}'.format(node_feat.shape))
