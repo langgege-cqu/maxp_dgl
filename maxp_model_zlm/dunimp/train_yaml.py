@@ -20,8 +20,6 @@ from util import load_dgl_graph
 from optimization import OptimAdam
 from loss import LabelSmoothingLoss, AsymmetricLoss
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
 
 def set_seed_logger(dataset_cfg):
     random.seed(dataset_cfg['SEED'])

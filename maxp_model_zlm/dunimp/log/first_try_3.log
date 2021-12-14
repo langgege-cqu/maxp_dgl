@@ -1,0 +1,421 @@
+################ Graph info: ###############
+Graph(num_nodes=3655452, num_edges=32824102,
+      ndata_schemes={}
+      edata_schemes={})
+################ Label info: ################
+Total labels (including not labeled): 3655452
+               Training label number: 835535
+             Validation label number: 208882
+                   Test label number: 592391
+################ Feature info: ###############
+Node's feature shape:torch.Size([3655452, 300])
+Walk's feature shape:torch.Size([3655452, 128])
+Edge's feature shape:torch.Size([3655452, 2])
+2021-12-14 01:27:39,321 - INFO: Model = DouUniCMP(
+  (InUniCMP): UniCMP(
+    (graphsage): ModuleList(
+      (0): GraphSageLayer(
+        (graph): SAGEConv(
+          (feat_drop): Dropout(p=0.0, inplace=False)
+          (lstm): LSTM(300, 300, batch_first=True)
+          (fc_self): Linear(in_features=300, out_features=512, bias=False)
+          (fc_neigh): Linear(in_features=300, out_features=512, bias=False)
+        )
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+      (1): GraphSageLayer(
+        (graph): SAGEConv(
+          (feat_drop): Dropout(p=0.0, inplace=False)
+          (lstm): LSTM(512, 512, batch_first=True)
+          (fc_self): Linear(in_features=512, out_features=512, bias=False)
+          (fc_neigh): Linear(in_features=512, out_features=512, bias=False)
+        )
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+    )
+    (graphattn): ModuleList(
+      (0): GraphAttnLayer(
+        (graph): GATConv(
+          (fc): Linear(in_features=300, out_features=512, bias=False)
+          (feat_drop): Dropout(p=0.0, inplace=False)
+          (attn_drop): Dropout(p=0, inplace=False)
+          (leaky_relu): LeakyReLU(negative_slope=0.2)
+        )
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+      (1): GraphAttnLayer(
+        (graph): GATConv(
+          (fc): Linear(in_features=512, out_features=512, bias=False)
+          (feat_drop): Dropout(p=0.0, inplace=False)
+          (attn_drop): Dropout(p=0, inplace=False)
+          (leaky_relu): LeakyReLU(negative_slope=0.2)
+        )
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+    )
+    (graphskip): ModuleList(
+      (0): ShortCutLayer(
+        (graph): Linear(in_features=300, out_features=512, bias=True)
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+      (1): ShortCutLayer(
+        (graph): Linear(in_features=300, out_features=512, bias=True)
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+      (2): ShortCutLayer(
+        (graph): Linear(in_features=512, out_features=512, bias=True)
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+    )
+    (attn_layers): ModuleList(
+      (0): MultiHeadedAttention(
+        (query): Linear(in_features=512, out_features=512, bias=True)
+        (key): Linear(in_features=512, out_features=512, bias=True)
+        (value): Linear(in_features=512, out_features=512, bias=True)
+        (dropout): Dropout(p=0.0, inplace=False)
+        (softmax): Softmax(dim=-1)
+      )
+      (1): MultiHeadedAttention(
+        (query): Linear(in_features=512, out_features=512, bias=True)
+        (key): Linear(in_features=512, out_features=512, bias=True)
+        (value): Linear(in_features=512, out_features=512, bias=True)
+        (dropout): Dropout(p=0.0, inplace=False)
+        (softmax): Softmax(dim=-1)
+      )
+    )
+    (norm_layers): ModuleList(
+      (0): LayerNorm()
+      (1): LayerNorm()
+    )
+    (label_embed): Embedding(24, 300, padding_idx=23)
+    (feat_mlp): Sequential(
+      (0): Linear(in_features=730, out_features=512, bias=True)
+      (1): LayerNorm()
+      (2): ReLU()
+      (3): Dropout(p=0.2, inplace=False)
+      (4): Linear(in_features=512, out_features=300, bias=True)
+    )
+    (label_dropout): Dropout(p=0.1, inplace=False)
+    (feat_dropout): Dropout(p=0.05, inplace=False)
+    (dropout): Dropout(p=0.2, inplace=False)
+  )
+  (OutUniCMP): UniCMP(
+    (graphsage): ModuleList(
+      (0): GraphSageLayer(
+        (graph): SAGEConv(
+          (feat_drop): Dropout(p=0.0, inplace=False)
+          (lstm): LSTM(300, 300, batch_first=True)
+          (fc_self): Linear(in_features=300, out_features=512, bias=False)
+          (fc_neigh): Linear(in_features=300, out_features=512, bias=False)
+        )
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+      (1): GraphSageLayer(
+        (graph): SAGEConv(
+          (feat_drop): Dropout(p=0.0, inplace=False)
+          (lstm): LSTM(512, 512, batch_first=True)
+          (fc_self): Linear(in_features=512, out_features=512, bias=False)
+          (fc_neigh): Linear(in_features=512, out_features=512, bias=False)
+        )
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+    )
+    (graphattn): ModuleList(
+      (0): GraphAttnLayer(
+        (graph): GATConv(
+          (fc): Linear(in_features=300, out_features=512, bias=False)
+          (feat_drop): Dropout(p=0.0, inplace=False)
+          (attn_drop): Dropout(p=0, inplace=False)
+          (leaky_relu): LeakyReLU(negative_slope=0.2)
+        )
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+      (1): GraphAttnLayer(
+        (graph): GATConv(
+          (fc): Linear(in_features=512, out_features=512, bias=False)
+          (feat_drop): Dropout(p=0.0, inplace=False)
+          (attn_drop): Dropout(p=0, inplace=False)
+          (leaky_relu): LeakyReLU(negative_slope=0.2)
+        )
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+    )
+    (graphskip): ModuleList(
+      (0): ShortCutLayer(
+        (graph): Linear(in_features=300, out_features=512, bias=True)
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+      (1): ShortCutLayer(
+        (graph): Linear(in_features=300, out_features=512, bias=True)
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+      (2): ShortCutLayer(
+        (graph): Linear(in_features=512, out_features=512, bias=True)
+        (norm): LayerNorm()
+        (dropout): Dropout(p=0.0, inplace=False)
+      )
+    )
+    (attn_layers): ModuleList(
+      (0): MultiHeadedAttention(
+        (query): Linear(in_features=512, out_features=512, bias=True)
+        (key): Linear(in_features=512, out_features=512, bias=True)
+        (value): Linear(in_features=512, out_features=512, bias=True)
+        (dropout): Dropout(p=0.0, inplace=False)
+        (softmax): Softmax(dim=-1)
+      )
+      (1): MultiHeadedAttention(
+        (query): Linear(in_features=512, out_features=512, bias=True)
+        (key): Linear(in_features=512, out_features=512, bias=True)
+        (value): Linear(in_features=512, out_features=512, bias=True)
+        (dropout): Dropout(p=0.0, inplace=False)
+        (softmax): Softmax(dim=-1)
+      )
+    )
+    (norm_layers): ModuleList(
+      (0): LayerNorm()
+      (1): LayerNorm()
+    )
+    (label_embed): Embedding(24, 300, padding_idx=23)
+    (feat_mlp): Sequential(
+      (0): Linear(in_features=730, out_features=512, bias=True)
+      (1): LayerNorm()
+      (2): ReLU()
+      (3): Dropout(p=0.2, inplace=False)
+      (4): Linear(in_features=512, out_features=300, bias=True)
+    )
+    (label_dropout): Dropout(p=0.1, inplace=False)
+    (feat_dropout): Dropout(p=0.05, inplace=False)
+    (dropout): Dropout(p=0.2, inplace=False)
+  )
+  (head): Sequential(
+    (0): Linear(in_features=1024, out_features=512, bias=True)
+    (1): LayerNorm()
+    (2): ReLU()
+    (3): Dropout(p=0.2, inplace=False)
+    (4): Linear(in_features=512, out_features=23, bias=True)
+  )
+)
+2021-12-14 01:27:39,324 - INFO: Model config = {'GNN_MODEL': 'unicmp', 'INPUT_SIZE': 300, 'NUM_LAYERS': 2, 'NUM_HEADS': 8, 'HIDDEN_SIZE': 512, 'NUM_CLASS': 23, 'LABEL_DROP': 0.1, 'FEAT_DORP': 0.05, 'GRAPH_DORP': 0.0, 'ATTN_DROP': 0.0, 'DROP': 0.2, 'USE_SAGE': True, 'USE_CONV': False, 'USE_ATTN': True, 'USE_RESNET': True, 'USE_DESNET': True, 'CHECKPOINT': ''}
+2021-12-14 01:27:39,324 - INFO: Dataset config = {'SEED': 2021, 'DATA_PATH': '../dataset', 'DEEPWALK_PATH': 'czw_deep_walk2.npy', 'K_FOLD': 3, 'EPOCHS': 50, 'BATCH_SIZE': 2048, 'BIDIRECTED': False, 'LOG_STEP': 200, 'FANOUTS': [30, 30], 'IN_FANOUTS': [30, 30], 'OUT_FANOUTS': [50, 50], 'NUM_CLASS': 23, 'REPLACE_LABEL': 0.04, 'MASK_LABEL': 0.16, 'EDGE_DROP': 0.2, 'NUM_WORKERS': 2, 'GRADIENT_ACCUMULATION_STEPS': 1, 'NORM_FEATURE': False, 'OUT_PATH': '../dgl_model/dunicmp/unicmp_split3', 'MODEL_PREFIX': 'unicmp_split2', 'TEST_PREFIX': 'unicmp_split2'}
+2021-12-14 01:27:39,324 - INFO: Optimizer config = {'LEARNING_RATE': 0.0005, 'COEF_LR': 1.0, 'SCHEDULE': 'warmup_linear', 'WEIGHT_DECAY': 0.0001, 'WARMUP_PROPORTION': 0.1}
+2021-12-14 01:27:39,324 - INFO: Criterion config = {'LOSS_TYPE': 'CL', 'NUM_CLASS': 23, 'GAMMA_NEG': 4, 'GAMMA_POS': 1, 'SMOOTHING': 0.1}
+2021-12-14 01:27:39,324 - INFO: Training parameters = 14072431
+2021-12-14 01:27:39,325 - INFO: Model parameters = 14072431
+2021-12-14 01:27:39,325 - INFO: Num steps = 20400
+2021-12-14 01:32:29,991 - INFO:   Epoch: 1/50, Step: 200/408, Lr: 0.000049, Loss: 1.487155, Acc: 0.547363, Time/step: 1.449292
+2021-12-14 01:36:45,466 - INFO:   Epoch: 1/50, Step: 400/408, Lr: 0.000098, Loss: 1.403447, Acc: 0.572754, Time/step: 1.277370
+2021-12-14 01:36:55,000 - INFO: Train Epoch 1/50 Finished | Train Loss: 1.690109 | Train Acc: 0.508082
+2021-12-14 01:38:22,980 - INFO: Val Epoch 1/50 Finished | Val Loss: 1.348371 | Val Acc: 0.591348
+2021-12-14 01:42:35,406 - INFO:   Epoch: 2/50, Step: 192/408, Lr: 0.000147, Loss: 1.334075, Acc: 0.586914, Time/step: 1.252284
+2021-12-14 01:47:16,231 - INFO:   Epoch: 2/50, Step: 392/408, Lr: 0.000196, Loss: 1.414276, Acc: 0.570801, Time/step: 1.404079
+2021-12-14 01:47:37,321 - INFO: Train Epoch 2/50 Finished | Train Loss: 1.378023 | Train Acc: 0.580684
+2021-12-14 01:49:10,628 - INFO: Val Epoch 2/50 Finished | Val Loss: 1.291548 | Val Acc: 0.602867
+2021-12-14 01:53:29,869 - INFO:   Epoch: 3/50, Step: 184/408, Lr: 0.000245, Loss: 1.268119, Acc: 0.607422, Time/step: 1.286483
+2021-12-14 01:57:54,893 - INFO:   Epoch: 3/50, Step: 384/408, Lr: 0.000294, Loss: 1.308960, Acc: 0.604980, Time/step: 1.325116
+2021-12-14 01:58:25,080 - INFO: Train Epoch 3/50 Finished | Train Loss: 1.322135 | Train Acc: 0.593625
+2021-12-14 01:59:50,074 - INFO: Val Epoch 3/50 Finished | Val Loss: 1.272986 | Val Acc: 0.606013
+2021-12-14 02:03:38,730 - INFO:   Epoch: 4/50, Step: 176/408, Lr: 0.000343, Loss: 1.315216, Acc: 0.594727, Time/step: 1.135302
+2021-12-14 02:08:02,831 - INFO:   Epoch: 4/50, Step: 376/408, Lr: 0.000392, Loss: 1.302788, Acc: 0.588867, Time/step: 1.320503
+2021-12-14 02:08:48,498 - INFO: Train Epoch 4/50 Finished | Train Loss: 1.290990 | Train Acc: 0.601363
+2021-12-14 02:10:18,353 - INFO: Val Epoch 4/50 Finished | Val Loss: 1.260492 | Val Acc: 0.608645
+2021-12-14 02:14:27,872 - INFO:   Epoch: 5/50, Step: 168/408, Lr: 0.000441, Loss: 1.216388, Acc: 0.635742, Time/step: 1.239564
+2021-12-14 02:18:54,454 - INFO:   Epoch: 5/50, Step: 368/408, Lr: 0.000490, Loss: 1.260745, Acc: 0.607910, Time/step: 1.332901
+2021-12-14 02:19:45,071 - INFO: Train Epoch 5/50 Finished | Train Loss: 1.268040 | Train Acc: 0.606522
+2021-12-14 02:21:07,400 - INFO: Val Epoch 5/50 Finished | Val Loss: 1.249402 | Val Acc: 0.610086
+2021-12-14 02:24:39,259 - INFO:   Epoch: 6/50, Step: 160/408, Lr: 0.000496, Loss: 1.223291, Acc: 0.634277, Time/step: 1.051781
+2021-12-14 02:29:08,192 - INFO:   Epoch: 6/50, Step: 360/408, Lr: 0.000490, Loss: 1.221645, Acc: 0.621094, Time/step: 1.344664
+2021-12-14 02:30:17,818 - INFO: Train Epoch 6/50 Finished | Train Loss: 1.247897 | Train Acc: 0.611718
+2021-12-14 02:31:49,003 - INFO: Val Epoch 6/50 Finished | Val Loss: 1.245965 | Val Acc: 0.612500
+2021-12-14 02:35:25,920 - INFO:   Epoch: 7/50, Step: 152/408, Lr: 0.000485, Loss: 1.242917, Acc: 0.608887, Time/step: 1.077383
+2021-12-14 02:40:01,590 - INFO:   Epoch: 7/50, Step: 352/408, Lr: 0.000479, Loss: 1.193290, Acc: 0.618164, Time/step: 1.378348
+2021-12-14 02:41:19,717 - INFO: Train Epoch 7/50 Finished | Train Loss: 1.226726 | Train Acc: 0.616857
+2021-12-14 02:42:51,381 - INFO: Val Epoch 7/50 Finished | Val Loss: 1.232913 | Val Acc: 0.616476
+2021-12-14 02:46:08,155 - INFO:   Epoch: 8/50, Step: 144/408, Lr: 0.000474, Loss: 1.231781, Acc: 0.599121, Time/step: 0.975981
+2021-12-14 02:50:15,966 - INFO:   Epoch: 8/50, Step: 344/408, Lr: 0.000468, Loss: 1.232135, Acc: 0.620605, Time/step: 1.239049
+2021-12-14 02:51:40,803 - INFO: Train Epoch 8/50 Finished | Train Loss: 1.209038 | Train Acc: 0.620659
+2021-12-14 02:53:07,317 - INFO: Val Epoch 8/50 Finished | Val Loss: 1.228985 | Val Acc: 0.617454
+2021-12-14 02:56:23,169 - INFO:   Epoch: 9/50, Step: 136/408, Lr: 0.000463, Loss: 1.171390, Acc: 0.636230, Time/step: 0.969744
+2021-12-14 03:01:09,803 - INFO:   Epoch: 9/50, Step: 336/408, Lr: 0.000458, Loss: 1.183305, Acc: 0.622559, Time/step: 1.433167
+2021-12-14 03:02:45,065 - INFO: Train Epoch 9/50 Finished | Train Loss: 1.193053 | Train Acc: 0.623988
+2021-12-14 03:04:17,407 - INFO: Val Epoch 9/50 Finished | Val Loss: 1.224513 | Val Acc: 0.617961
+2021-12-14 03:07:13,060 - INFO:   Epoch: 10/50, Step: 128/408, Lr: 0.000452, Loss: 1.165562, Acc: 0.639648, Time/step: 0.871257
+2021-12-14 03:11:21,386 - INFO:   Epoch: 10/50, Step: 328/408, Lr: 0.000447, Loss: 1.198186, Acc: 0.624023, Time/step: 1.241624
+2021-12-14 03:13:03,271 - INFO: Train Epoch 10/50 Finished | Train Loss: 1.178193 | Train Acc: 0.628124
+2021-12-14 03:14:26,689 - INFO: Val Epoch 10/50 Finished | Val Loss: 1.220356 | Val Acc: 0.620341
+2021-12-14 03:17:19,688 - INFO:   Epoch: 11/50, Step: 120/408, Lr: 0.000441, Loss: 1.183944, Acc: 0.614746, Time/step: 0.855537
+2021-12-14 03:21:58,134 - INFO:   Epoch: 11/50, Step: 320/408, Lr: 0.000436, Loss: 1.192291, Acc: 0.616699, Time/step: 1.392191
+2021-12-14 03:24:00,849 - INFO: Train Epoch 11/50 Finished | Train Loss: 1.165013 | Train Acc: 0.630917
+2021-12-14 03:25:30,532 - INFO: Val Epoch 11/50 Finished | Val Loss: 1.221968 | Val Acc: 0.620026
+2021-12-14 03:28:09,564 - INFO:   Epoch: 12/50, Step: 112/408, Lr: 0.000430, Loss: 1.144733, Acc: 0.636719, Time/step: 0.786342
+2021-12-14 03:32:27,203 - INFO:   Epoch: 12/50, Step: 312/408, Lr: 0.000425, Loss: 1.148337, Acc: 0.637695, Time/step: 1.288190
+2021-12-14 03:34:29,752 - INFO: Train Epoch 12/50 Finished | Train Loss: 1.152109 | Train Acc: 0.633735
+2021-12-14 03:35:51,823 - INFO: Val Epoch 12/50 Finished | Val Loss: 1.223190 | Val Acc: 0.619684
+2021-12-14 03:38:22,211 - INFO:   Epoch: 13/50, Step: 104/408, Lr: 0.000419, Loss: 1.181866, Acc: 0.632324, Time/step: 0.745772
+2021-12-14 03:42:23,818 - INFO:   Epoch: 13/50, Step: 304/408, Lr: 0.000414, Loss: 1.197518, Acc: 0.616699, Time/step: 1.208037
+2021-12-14 03:44:29,914 - INFO: Train Epoch 13/50 Finished | Train Loss: 1.138774 | Train Acc: 0.637013
+2021-12-14 03:45:45,744 - INFO: Val Epoch 13/50 Finished | Val Loss: 1.221455 | Val Acc: 0.621135
+2021-12-14 03:47:47,704 - INFO:   Epoch: 14/50, Step: 96/408, Lr: 0.000408, Loss: 1.105509, Acc: 0.650391, Time/step: 0.603377
+2021-12-14 03:51:42,716 - INFO:   Epoch: 14/50, Step: 296/408, Lr: 0.000403, Loss: 1.105926, Acc: 0.643066, Time/step: 1.175061
+2021-12-14 03:53:46,293 - INFO: Train Epoch 14/50 Finished | Train Loss: 1.125706 | Train Acc: 0.640393
+2021-12-14 03:54:56,975 - INFO: Val Epoch 14/50 Finished | Val Loss: 1.217346 | Val Acc: 0.622001
+2021-12-14 03:56:50,484 - INFO:   Epoch: 15/50, Step: 88/408, Lr: 0.000398, Loss: 1.089234, Acc: 0.646973, Time/step: 0.559378
+2021-12-14 04:00:30,803 - INFO:   Epoch: 15/50, Step: 288/408, Lr: 0.000392, Loss: 1.102800, Acc: 0.641602, Time/step: 1.101546
+2021-12-14 04:02:46,674 - INFO: Train Epoch 15/50 Finished | Train Loss: 1.111952 | Train Acc: 0.643433
+2021-12-14 04:04:01,769 - INFO: Val Epoch 15/50 Finished | Val Loss: 1.225956 | Val Acc: 0.620197
+2021-12-14 04:05:41,932 - INFO:   Epoch: 16/50, Step: 80/408, Lr: 0.000387, Loss: 1.099141, Acc: 0.641602, Time/step: 0.492508
+2021-12-14 04:09:43,977 - INFO:   Epoch: 16/50, Step: 280/408, Lr: 0.000381, Loss: 1.132785, Acc: 0.631348, Time/step: 1.210224
+2021-12-14 04:12:10,985 - INFO: Train Epoch 16/50 Finished | Train Loss: 1.098605 | Train Acc: 0.646334
+2021-12-14 04:13:25,813 - INFO: Val Epoch 16/50 Finished | Val Loss: 1.229356 | Val Acc: 0.622146
+2021-12-14 04:14:53,886 - INFO:   Epoch: 17/50, Step: 72/408, Lr: 0.000376, Loss: 1.078763, Acc: 0.647949, Time/step: 0.434418
+2021-12-14 04:18:38,697 - INFO:   Epoch: 17/50, Step: 272/408, Lr: 0.000370, Loss: 1.128387, Acc: 0.643066, Time/step: 1.124010
+2021-12-14 04:21:09,821 - INFO: Train Epoch 17/50 Finished | Train Loss: 1.084967 | Train Acc: 0.649555
+2021-12-14 04:22:21,329 - INFO: Val Epoch 17/50 Finished | Val Loss: 1.229694 | Val Acc: 0.621151
+2021-12-14 04:23:42,366 - INFO:   Epoch: 18/50, Step: 64/408, Lr: 0.000365, Loss: 1.062758, Acc: 0.653320, Time/step: 0.397174
+2021-12-14 04:27:40,962 - INFO:   Epoch: 18/50, Step: 264/408, Lr: 0.000359, Loss: 1.040806, Acc: 0.659180, Time/step: 1.192978
+2021-12-14 04:30:38,128 - INFO: Train Epoch 18/50 Finished | Train Loss: 1.072073 | Train Acc: 0.652995
+2021-12-14 04:31:51,956 - INFO: Val Epoch 18/50 Finished | Val Loss: 1.230723 | Val Acc: 0.621256
+2021-12-14 04:33:03,077 - INFO:   Epoch: 19/50, Step: 56/408, Lr: 0.000354, Loss: 1.073501, Acc: 0.656250, Time/step: 0.348796
+2021-12-14 04:36:52,390 - INFO:   Epoch: 19/50, Step: 256/408, Lr: 0.000349, Loss: 1.113681, Acc: 0.640625, Time/step: 1.146563
+2021-12-14 04:39:41,821 - INFO: Train Epoch 19/50 Finished | Train Loss: 1.057313 | Train Acc: 0.656318
+2021-12-14 04:40:51,101 - INFO: Val Epoch 19/50 Finished | Val Loss: 1.243029 | Val Acc: 0.622264
+2021-12-14 04:41:52,528 - INFO:   Epoch: 20/50, Step: 48/408, Lr: 0.000343, Loss: 1.006599, Acc: 0.679688, Time/step: 0.300383
+2021-12-14 04:45:38,160 - INFO:   Epoch: 20/50, Step: 248/408, Lr: 0.000338, Loss: 1.036960, Acc: 0.670410, Time/step: 1.128160
+2021-12-14 04:48:42,395 - INFO: Train Epoch 20/50 Finished | Train Loss: 1.043696 | Train Acc: 0.659707
+2021-12-14 04:49:58,443 - INFO: Val Epoch 20/50 Finished | Val Loss: 1.246832 | Val Acc: 0.621351
+2021-12-14 04:50:49,816 - INFO:   Epoch: 21/50, Step: 40/408, Lr: 0.000332, Loss: 1.055218, Acc: 0.652832, Time/step: 0.250159
+2021-12-14 04:54:55,330 - INFO:   Epoch: 21/50, Step: 240/408, Lr: 0.000327, Loss: 1.004146, Acc: 0.670898, Time/step: 1.227572
+2021-12-14 04:58:14,944 - INFO: Train Epoch 21/50 Finished | Train Loss: 1.030613 | Train Acc: 0.662971
+2021-12-14 04:59:30,261 - INFO: Val Epoch 21/50 Finished | Val Loss: 1.250704 | Val Acc: 0.620857
+2021-12-14 05:00:09,741 - INFO:   Epoch: 22/50, Step: 32/408, Lr: 0.000321, Loss: 0.984481, Acc: 0.676270, Time/step: 0.190874
+2021-12-14 05:04:00,214 - INFO:   Epoch: 22/50, Step: 232/408, Lr: 0.000316, Loss: 1.017697, Acc: 0.661133, Time/step: 1.152366
+2021-12-14 05:07:20,691 - INFO: Train Epoch 22/50 Finished | Train Loss: 1.014765 | Train Acc: 0.667399
+2021-12-14 05:08:27,491 - INFO: Val Epoch 22/50 Finished | Val Loss: 1.254282 | Val Acc: 0.622045
+2021-12-14 05:08:57,284 - INFO:   Epoch: 23/50, Step: 24/408, Lr: 0.000310, Loss: 0.960838, Acc: 0.680176, Time/step: 0.143011
+2021-12-14 05:12:56,612 - INFO:   Epoch: 23/50, Step: 224/408, Lr: 0.000305, Loss: 1.073499, Acc: 0.633789, Time/step: 1.196621
+2021-12-14 05:16:36,219 - INFO: Train Epoch 23/50 Finished | Train Loss: 1.001275 | Train Acc: 0.670165
+2021-12-14 05:17:48,651 - INFO: Val Epoch 23/50 Finished | Val Loss: 1.261708 | Val Acc: 0.620527
+2021-12-14 05:18:10,016 - INFO:   Epoch: 24/50, Step: 16/408, Lr: 0.000300, Loss: 0.989977, Acc: 0.663086, Time/step: 0.100044
+2021-12-14 05:22:05,834 - INFO:   Epoch: 24/50, Step: 216/408, Lr: 0.000294, Loss: 1.002603, Acc: 0.670410, Time/step: 1.179086
+2021-12-14 05:25:37,859 - INFO: Train Epoch 24/50 Finished | Train Loss: 0.987514 | Train Acc: 0.673744
+2021-12-14 05:26:50,599 - INFO: Val Epoch 24/50 Finished | Val Loss: 1.269859 | Val Acc: 0.621385
+2021-12-14 05:27:04,391 - INFO:   Epoch: 25/50, Step: 8/408, Lr: 0.000289, Loss: 0.963360, Acc: 0.676270, Time/step: 0.061013
+2021-12-14 05:30:50,675 - INFO:   Epoch: 25/50, Step: 208/408, Lr: 0.000283, Loss: 0.953204, Acc: 0.687988, Time/step: 1.131353
+2021-12-14 05:34:38,784 - INFO:   Epoch: 25/50, Step: 408/408, Lr: 0.000278, Loss: 0.963707, Acc: 0.677339, Time/step: 1.140543
+2021-12-14 05:34:38,786 - INFO: Train Epoch 25/50 Finished | Train Loss: 0.972531 | Train Acc: 0.677468
+2021-12-14 05:35:54,234 - INFO: Val Epoch 25/50 Finished | Val Loss: 1.278288 | Val Acc: 0.621820
+2021-12-14 05:40:04,858 - INFO:   Epoch: 26/50, Step: 200/408, Lr: 0.000272, Loss: 1.004733, Acc: 0.666504, Time/step: 1.246926
+2021-12-14 05:43:59,040 - INFO:   Epoch: 26/50, Step: 400/408, Lr: 0.000267, Loss: 0.947369, Acc: 0.681152, Time/step: 1.170907
+2021-12-14 05:44:08,783 - INFO: Train Epoch 26/50 Finished | Train Loss: 0.957948 | Train Acc: 0.681712
+2021-12-14 05:45:20,815 - INFO: Val Epoch 26/50 Finished | Val Loss: 1.281636 | Val Acc: 0.620235
+2021-12-14 05:49:05,307 - INFO:   Epoch: 27/50, Step: 192/408, Lr: 0.000261, Loss: 0.987383, Acc: 0.678711, Time/step: 1.115648
+2021-12-14 05:52:55,833 - INFO:   Epoch: 27/50, Step: 392/408, Lr: 0.000256, Loss: 0.959408, Acc: 0.682129, Time/step: 1.152627
+2021-12-14 05:53:13,538 - INFO: Train Epoch 27/50 Finished | Train Loss: 0.943363 | Train Acc: 0.684830
+2021-12-14 05:54:22,169 - INFO: Val Epoch 27/50 Finished | Val Loss: 1.298783 | Val Acc: 0.618982
+2021-12-14 05:58:09,405 - INFO:   Epoch: 28/50, Step: 184/408, Lr: 0.000251, Loss: 0.933767, Acc: 0.677734, Time/step: 1.130352
+2021-12-14 06:02:08,453 - INFO:   Epoch: 28/50, Step: 384/408, Lr: 0.000245, Loss: 0.937115, Acc: 0.684082, Time/step: 1.195237
+2021-12-14 06:02:38,997 - INFO: Train Epoch 28/50 Finished | Train Loss: 0.928895 | Train Acc: 0.688814
+2021-12-14 06:03:52,967 - INFO: Val Epoch 28/50 Finished | Val Loss: 1.310748 | Val Acc: 0.617702
+2021-12-14 06:07:30,921 - INFO:   Epoch: 29/50, Step: 176/408, Lr: 0.000240, Loss: 0.941962, Acc: 0.688965, Time/step: 1.083443
+2021-12-14 06:11:12,824 - INFO:   Epoch: 29/50, Step: 376/408, Lr: 0.000234, Loss: 0.937298, Acc: 0.687988, Time/step: 1.109512
+2021-12-14 06:11:50,948 - INFO: Train Epoch 29/50 Finished | Train Loss: 0.914802 | Train Acc: 0.692773
+2021-12-14 06:13:02,771 - INFO: Val Epoch 29/50 Finished | Val Loss: 1.320179 | Val Acc: 0.617463
+2021-12-14 06:16:21,329 - INFO:   Epoch: 30/50, Step: 168/408, Lr: 0.000229, Loss: 0.914163, Acc: 0.694824, Time/step: 0.986521
+2021-12-14 06:20:14,173 - INFO:   Epoch: 30/50, Step: 368/408, Lr: 0.000223, Loss: 0.868924, Acc: 0.701660, Time/step: 1.164219
+2021-12-14 06:21:01,605 - INFO: Train Epoch 30/50 Finished | Train Loss: 0.899336 | Train Acc: 0.697249
+2021-12-14 06:22:15,246 - INFO: Val Epoch 30/50 Finished | Val Loss: 1.328978 | Val Acc: 0.616899
+2021-12-14 06:25:36,478 - INFO:   Epoch: 31/50, Step: 160/408, Lr: 0.000218, Loss: 0.846816, Acc: 0.706543, Time/step: 0.999996
+2021-12-14 06:29:30,386 - INFO:   Epoch: 31/50, Step: 360/408, Lr: 0.000212, Loss: 0.891600, Acc: 0.696289, Time/step: 1.169535
+2021-12-14 06:30:25,458 - INFO: Train Epoch 31/50 Finished | Train Loss: 0.885465 | Train Acc: 0.700757
+2021-12-14 06:31:38,573 - INFO: Val Epoch 31/50 Finished | Val Loss: 1.334628 | Val Acc: 0.616105
+2021-12-14 06:34:39,624 - INFO:   Epoch: 32/50, Step: 152/408, Lr: 0.000207, Loss: 0.848716, Acc: 0.723633, Time/step: 0.899280
+2021-12-14 06:38:29,078 - INFO:   Epoch: 32/50, Step: 352/408, Lr: 0.000202, Loss: 0.905787, Acc: 0.706055, Time/step: 1.147271
+2021-12-14 06:39:31,013 - INFO: Train Epoch 32/50 Finished | Train Loss: 0.870488 | Train Acc: 0.705282
+2021-12-14 06:40:43,284 - INFO: Val Epoch 32/50 Finished | Val Loss: 1.348037 | Val Acc: 0.616008
+2021-12-14 06:43:44,610 - INFO:   Epoch: 33/50, Step: 144/408, Lr: 0.000196, Loss: 0.871638, Acc: 0.703613, Time/step: 0.899747
+2021-12-14 06:47:47,759 - INFO:   Epoch: 33/50, Step: 344/408, Lr: 0.000191, Loss: 0.852802, Acc: 0.705078, Time/step: 1.215743
+2021-12-14 06:49:00,409 - INFO: Train Epoch 33/50 Finished | Train Loss: 0.857186 | Train Acc: 0.709018
+2021-12-14 06:50:08,885 - INFO: Val Epoch 33/50 Finished | Val Loss: 1.363117 | Val Acc: 0.614519
+2021-12-14 06:52:54,672 - INFO:   Epoch: 34/50, Step: 136/408, Lr: 0.000185, Loss: 0.847373, Acc: 0.708496, Time/step: 0.820115
+2021-12-14 06:56:40,324 - INFO:   Epoch: 34/50, Step: 336/408, Lr: 0.000180, Loss: 0.849329, Acc: 0.718262, Time/step: 1.128261
+2021-12-14 06:58:01,383 - INFO: Train Epoch 34/50 Finished | Train Loss: 0.844007 | Train Acc: 0.713013
+2021-12-14 06:59:12,280 - INFO: Val Epoch 34/50 Finished | Val Loss: 1.372942 | Val Acc: 0.614568
+2021-12-14 07:01:47,384 - INFO:   Epoch: 35/50, Step: 128/408, Lr: 0.000174, Loss: 0.804737, Acc: 0.721191, Time/step: 0.769647
+2021-12-14 07:05:38,804 - INFO:   Epoch: 35/50, Step: 328/408, Lr: 0.000169, Loss: 0.841145, Acc: 0.712891, Time/step: 1.157098
+2021-12-14 07:07:12,510 - INFO: Train Epoch 35/50 Finished | Train Loss: 0.829288 | Train Acc: 0.717129
+2021-12-14 07:08:29,879 - INFO: Val Epoch 35/50 Finished | Val Loss: 1.389902 | Val Acc: 0.614360
+2021-12-14 07:10:59,020 - INFO:   Epoch: 36/50, Step: 120/408, Lr: 0.000163, Loss: 0.823571, Acc: 0.715332, Time/step: 0.739597
+2021-12-14 07:14:52,852 - INFO:   Epoch: 36/50, Step: 320/408, Lr: 0.000158, Loss: 0.800493, Acc: 0.720215, Time/step: 1.169162
+2021-12-14 07:16:37,047 - INFO: Train Epoch 36/50 Finished | Train Loss: 0.816378 | Train Acc: 0.721286
+2021-12-14 07:17:44,423 - INFO: Val Epoch 36/50 Finished | Val Loss: 1.393303 | Val Acc: 0.612634
+2021-12-14 07:19:58,963 - INFO:   Epoch: 37/50, Step: 112/408, Lr: 0.000153, Loss: 0.876090, Acc: 0.697754, Time/step: 0.666545
+2021-12-14 07:23:52,847 - INFO:   Epoch: 37/50, Step: 312/408, Lr: 0.000147, Loss: 0.831506, Acc: 0.709961, Time/step: 1.169419
+2021-12-14 07:25:38,473 - INFO: Train Epoch 37/50 Finished | Train Loss: 0.805272 | Train Acc: 0.724385
+2021-12-14 07:26:53,664 - INFO: Val Epoch 37/50 Finished | Val Loss: 1.410356 | Val Acc: 0.612723
+2021-12-14 07:29:01,562 - INFO:   Epoch: 38/50, Step: 104/408, Lr: 0.000142, Loss: 0.751135, Acc: 0.749023, Time/step: 0.633520
+2021-12-14 07:32:59,901 - INFO:   Epoch: 38/50, Step: 304/408, Lr: 0.000136, Loss: 0.765012, Acc: 0.736328, Time/step: 1.191693
+2021-12-14 07:35:01,742 - INFO: Train Epoch 38/50 Finished | Train Loss: 0.791101 | Train Acc: 0.728715
+2021-12-14 07:36:18,088 - INFO: Val Epoch 38/50 Finished | Val Loss: 1.425529 | Val Acc: 0.612829
+2021-12-14 07:38:12,956 - INFO:   Epoch: 39/50, Step: 96/408, Lr: 0.000131, Loss: 0.787863, Acc: 0.735352, Time/step: 0.568958
+2021-12-14 07:42:08,698 - INFO:   Epoch: 39/50, Step: 296/408, Lr: 0.000125, Loss: 0.779967, Acc: 0.735840, Time/step: 1.178709
+2021-12-14 07:44:13,536 - INFO: Train Epoch 39/50 Finished | Train Loss: 0.779303 | Train Acc: 0.732040
+2021-12-14 07:45:21,910 - INFO: Val Epoch 39/50 Finished | Val Loss: 1.434180 | Val Acc: 0.610043
+2021-12-14 07:47:04,123 - INFO:   Epoch: 40/50, Step: 88/408, Lr: 0.000120, Loss: 0.763623, Acc: 0.737793, Time/step: 0.504765
+2021-12-14 07:50:58,975 - INFO:   Epoch: 40/50, Step: 288/408, Lr: 0.000114, Loss: 0.759221, Acc: 0.731934, Time/step: 1.174202
+2021-12-14 07:53:21,281 - INFO: Train Epoch 40/50 Finished | Train Loss: 0.767731 | Train Acc: 0.735369
+2021-12-14 07:54:37,235 - INFO: Val Epoch 40/50 Finished | Val Loss: 1.450771 | Val Acc: 0.610661
+2021-12-14 07:56:16,218 - INFO:   Epoch: 41/50, Step: 80/408, Lr: 0.000109, Loss: 0.709723, Acc: 0.760254, Time/step: 0.487597
+2021-12-14 08:00:15,780 - INFO:   Epoch: 41/50, Step: 280/408, Lr: 0.000103, Loss: 0.768746, Acc: 0.725586, Time/step: 1.197810
+2021-12-14 08:02:42,418 - INFO: Train Epoch 41/50 Finished | Train Loss: 0.755573 | Train Acc: 0.739213
+2021-12-14 08:03:52,186 - INFO: Val Epoch 41/50 Finished | Val Loss: 1.468074 | Val Acc: 0.610598
+2021-12-14 08:05:18,869 - INFO:   Epoch: 42/50, Step: 72/408, Lr: 0.000098, Loss: 0.749608, Acc: 0.747559, Time/step: 0.427202
+2021-12-14 08:09:13,271 - INFO:   Epoch: 42/50, Step: 272/408, Lr: 0.000093, Loss: 0.768291, Acc: 0.735352, Time/step: 1.172009
+2021-12-14 08:11:44,196 - INFO: Train Epoch 42/50 Finished | Train Loss: 0.744062 | Train Acc: 0.742665
+2021-12-14 08:13:01,845 - INFO: Val Epoch 42/50 Finished | Val Loss: 1.476221 | Val Acc: 0.610315
+2021-12-14 08:14:20,956 - INFO:   Epoch: 43/50, Step: 64/408, Lr: 0.000087, Loss: 0.732243, Acc: 0.747070, Time/step: 0.388074
+2021-12-14 08:18:21,905 - INFO:   Epoch: 43/50, Step: 264/408, Lr: 0.000082, Loss: 0.715155, Acc: 0.741699, Time/step: 1.204730
+2021-12-14 08:21:12,846 - INFO: Train Epoch 43/50 Finished | Train Loss: 0.733889 | Train Acc: 0.746085
+2021-12-14 08:22:29,724 - INFO: Val Epoch 43/50 Finished | Val Loss: 1.496579 | Val Acc: 0.609607
+2021-12-14 08:23:39,547 - INFO:   Epoch: 44/50, Step: 56/408, Lr: 0.000076, Loss: 0.715506, Acc: 0.751465, Time/step: 0.341064
+2021-12-14 08:27:35,118 - INFO:   Epoch: 44/50, Step: 256/408, Lr: 0.000071, Loss: 0.762695, Acc: 0.740723, Time/step: 1.177849
+2021-12-14 08:30:27,988 - INFO: Train Epoch 44/50 Finished | Train Loss: 0.724493 | Train Acc: 0.749053
+2021-12-14 08:31:37,757 - INFO: Val Epoch 44/50 Finished | Val Loss: 1.505563 | Val Acc: 0.607227
+2021-12-14 08:32:34,190 - INFO:   Epoch: 45/50, Step: 48/408, Lr: 0.000065, Loss: 0.721351, Acc: 0.739746, Time/step: 0.275393
+2021-12-14 08:36:23,160 - INFO:   Epoch: 45/50, Step: 248/408, Lr: 0.000060, Loss: 0.699333, Acc: 0.755859, Time/step: 1.144846
+2021-12-14 08:39:25,987 - INFO: Train Epoch 45/50 Finished | Train Loss: 0.713442 | Train Acc: 0.752059
+2021-12-14 08:40:40,188 - INFO: Val Epoch 45/50 Finished | Val Loss: 1.514620 | Val Acc: 0.607555
+2021-12-14 08:41:31,372 - INFO:   Epoch: 46/50, Step: 40/408, Lr: 0.000054, Loss: 0.709249, Acc: 0.760254, Time/step: 0.249708
+2021-12-14 08:45:29,494 - INFO:   Epoch: 46/50, Step: 240/408, Lr: 0.000049, Loss: 0.702749, Acc: 0.755371, Time/step: 1.190605
+2021-12-14 08:48:47,219 - INFO: Train Epoch 46/50 Finished | Train Loss: 0.705800 | Train Acc: 0.754949
+2021-12-14 08:49:59,715 - INFO: Val Epoch 46/50 Finished | Val Loss: 1.528103 | Val Acc: 0.608267
+2021-12-14 08:50:39,730 - INFO:   Epoch: 47/50, Step: 32/408, Lr: 0.000044, Loss: 0.709344, Acc: 0.763672, Time/step: 0.193311
+2021-12-14 08:54:32,949 - INFO:   Epoch: 47/50, Step: 232/408, Lr: 0.000038, Loss: 0.703810, Acc: 0.762207, Time/step: 1.166046
+2021-12-14 08:57:43,298 - INFO: Train Epoch 47/50 Finished | Train Loss: 0.697848 | Train Acc: 0.757396
+2021-12-14 08:58:59,177 - INFO: Val Epoch 47/50 Finished | Val Loss: 1.534026 | Val Acc: 0.608521
+2021-12-14 08:59:30,824 - INFO:   Epoch: 48/50, Step: 24/408, Lr: 0.000033, Loss: 0.666106, Acc: 0.776367, Time/step: 0.152342
+2021-12-14 09:03:33,776 - INFO:   Epoch: 48/50, Step: 224/408, Lr: 0.000027, Loss: 0.664451, Acc: 0.755371, Time/step: 1.214761
+2021-12-14 09:07:10,131 - INFO: Train Epoch 48/50 Finished | Train Loss: 0.690918 | Train Acc: 0.759118
+2021-12-14 09:08:22,147 - INFO: Val Epoch 48/50 Finished | Val Loss: 1.543589 | Val Acc: 0.607534
+2021-12-14 09:08:43,463 - INFO:   Epoch: 49/50, Step: 16/408, Lr: 0.000022, Loss: 0.666808, Acc: 0.768555, Time/step: 0.099608
+2021-12-14 09:12:40,777 - INFO:   Epoch: 49/50, Step: 216/408, Lr: 0.000016, Loss: 0.663281, Acc: 0.753418, Time/step: 1.186569
+2021-12-14 09:16:26,227 - INFO: Train Epoch 49/50 Finished | Train Loss: 0.683190 | Train Acc: 0.761847
+2021-12-14 09:17:39,050 - INFO: Val Epoch 49/50 Finished | Val Loss: 1.546005 | Val Acc: 0.607218
+2021-12-14 09:17:51,524 - INFO:   Epoch: 50/50, Step: 8/408, Lr: 0.000011, Loss: 0.642864, Acc: 0.766113, Time/step: 0.056598
+2021-12-14 09:21:44,127 - INFO:   Epoch: 50/50, Step: 208/408, Lr: 0.000005, Loss: 0.671967, Acc: 0.768066, Time/step: 1.163016
+2021-12-14 09:25:37,412 - INFO:   Epoch: 50/50, Step: 408/408, Lr: -0.000000, Loss: 0.671818, Acc: 0.774887, Time/step: 1.166424
+2021-12-14 09:25:37,423 - INFO: Train Epoch 50/50 Finished | Train Loss: 0.679232 | Train Acc: 0.762953
+2021-12-14 09:26:52,387 - INFO: Val Epoch 50/50 Finished | Val Loss: 1.550773 | Val Acc: 0.607760
+2021-12-14 09:26:52,387 - INFO: Best Epoch 19 | Train Loss: 1.057313 | Train Acc: 0.656318 | Val Loss: 1.243029 | Val Acc: 0.622264 
+Using backend: pytorch

@@ -15,7 +15,7 @@ MODEL:
   USE_ATTN: True
   USE_RESNET: True
   USE_DESNET: True
-  CHECKPOINT: ''
+  CHECKPOINT: '../dgl_model/unicmp_gatv1/unicmp_split0/models/unicmp_split_epoch27_val6331.pth'
 
 
 OPTIMIZER:
@@ -37,11 +37,17 @@ CRITERION:
 DATASET:
   SEED: 2021
   DATA_PATH: ../dataset
+  DEEPWALK_PATH: czw_deep_walk2.npy #deep_walk1.npy
+  NEIGHBOR_FEATURES_PATH: features_neigh01.npy
   K_FOLD: 2 #[0, 1, 2, 3, 4]
   EPOCHS: 50
   BATCH_SIZE: 1024
+  BIDIRECTED: True
   LOG_STEP: 200
+  SAMPLER: in #in_out
   FANOUTS: [30, 30]
+  IN_FANOUTS: [15, 15]
+  OUT_FANOUTS: [15, 15]
   NUM_CLASS: 23
   REPLACE_LABEL: 0.04
   MASK_LABEL: 0.16
@@ -49,6 +55,6 @@ DATASET:
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
   NORM_FEATURE: False
-  OUT_PATH: ../dgl_model/unicmp/unicmp_split2
-  MODEL_PREFIX: unicmp_split2
-  TEST_PREFIX: unicmp_split2
+  OUT_PATH: ../dgl_model/unicmp_gatv1/unicmp_split
+  MODEL_PREFIX: unicmp_split
+  TEST_PREFIX: unicmp_gatv1

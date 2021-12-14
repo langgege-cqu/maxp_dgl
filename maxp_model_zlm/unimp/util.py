@@ -10,11 +10,19 @@ def minMaxScaling(data):
     return mind + (data - mind) / (maxd - mind)
 
 
-def load_dgl_graph(base_path, k=None, to_bidirected=False):
+def load_dgl_graph(dataset_cfg):
+    base_path = dataset_cfg['DATA_PATH']
+    k = dataset_cfg['K_FOLD']
+    to_bidirected = dataset_cfg['BIDIRECTED']
+
     graphs, _ = dgl.load_graphs(os.path.join(base_path, 'graph.bin'))
-    edge_feat = th.cat((minMaxScaling(graphs[0].in_degrees().unsqueeze_(1).float().add(1).log()),
-                        minMaxScaling(graphs[0].out_degrees().unsqueeze_(1).float().add(1).log())),
-                       dim=1)
+    edge_feat = th.cat(
+        (
+            minMaxScaling(graphs[0].in_degrees().unsqueeze_(1).float().add(1).log()
+                          ), minMaxScaling(graphs[0].out_degrees().unsqueeze_(1).float().add(1).log())
+        ),
+        dim=1
+    )
 
     graph = graphs[0]
     if to_bidirected:
@@ -45,8 +53,9 @@ def load_dgl_graph(base_path, k=None, to_bidirected=False):
     print('                   Test label number: {}'.format(test_label_idx.shape[0]))
 
     node_feat = th.from_numpy(np.load(os.path.join(base_path, 'features.npy'))).float()
-    walk_feat = th.from_numpy(np.load(os.path.join(base_path, 'deepwalk.npy'))).float()
-
+    walk_feat = th.from_numpy(np.load(os.path.join(base_path, dataset_cfg['DEEPWALK_PATH']))).float()
+    neighbor_feat = th.from_numpy(np.load(os.path.join(base_path, dataset_cfg['NEIGHBOR_FEATURES_PATH']))).float()
+    # features = th.cat((node_feat, walk_feat, edge_feat, neighbor_feat), dim=1)
     features = th.cat((node_feat, walk_feat, edge_feat), dim=1)
 
     print('################ Feature info: ###############')

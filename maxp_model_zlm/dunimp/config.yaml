@@ -37,7 +37,7 @@ CRITERION:
 DATASET:
   SEED: 2021
   DATA_PATH: ../dataset
-  DEEPWALK_PATH: czw_deep_walk2.npy
+  DEEPWALK_PATH: czw_deep_walk2.npy #deep_walk1.npy
   K_FOLD: 0 #[0, 1, 2, 3, 4]
   EPOCHS: 50
   BATCH_SIZE: 2048
@@ -45,7 +45,7 @@ DATASET:
   LOG_STEP: 200
   FANOUTS: [30, 30]
   IN_FANOUTS: [30, 30]
-  OUT_FANOUTS: [30, 30]
+  OUT_FANOUTS: [50, 50]
   NUM_CLASS: 23
   REPLACE_LABEL: 0.04
   MASK_LABEL: 0.16
