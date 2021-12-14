@@ -220,3 +220,5 @@ Using backend: pytorch
 2021-12-14 22:54:29,427 - INFO: Train Epoch 16/50 Finished | Train Loss: 1.148144 | Train Acc: 0.635887
 2021-12-14 22:55:49,042 - INFO: Val Epoch 16/50 Finished | Val Loss: 1.180120 | Val Acc: 0.631784
 2021-12-14 22:57:15,016 - INFO:   Epoch: 17/50, Step: 144/816, Lr: 0.000376, Loss: 1.191440, Acc: 0.629883, Time/step: 0.418013
+2021-12-14 22:59:08,133 - INFO:   Epoch: 17/50, Step: 344/816, Lr: 0.000373, Loss: 1.122212, Acc: 0.634766, Time/step: 0.565582
+2021-12-14 23:00:57,762 - INFO:   Epoch: 17/50, Step: 544/816, Lr: 0.000370, Loss: 1.173489, Acc: 0.623047, Time/step: 0.548140
