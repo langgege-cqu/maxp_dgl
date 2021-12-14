@@ -1,5 +1,5 @@
 /data
-.log
+*.log
 dgl_model
 dataset
 graphmodel
