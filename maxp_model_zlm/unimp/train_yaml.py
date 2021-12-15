@@ -339,7 +339,7 @@ if __name__ == '__main__':
     criterion_cfg = config['CRITERION']
     dataset_cfg['K_FOLD'] = args.k_fold
 
-    dataset_cfg['OUT_PATH'] = dataset_cfg['OUT_PATH'] + str(dataset_cfg['K_FOLD'])
+    dataset_cfg['OUT_PATH'] = os.path.join(dataset_cfg['OUT_PATH'], 'split{:0>2d}'.format(dataset_cfg['K_FOLD']))
     os.makedirs(dataset_cfg['OUT_PATH'], exist_ok=True)
     os.system('cp {} {}/config.yaml'.format(yaml_path, dataset_cfg['OUT_PATH']))
 

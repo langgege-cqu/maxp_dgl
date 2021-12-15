@@ -56,6 +56,6 @@ DATASET:
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
   NORM_FEATURE: False
-  OUT_PATH: ../dgl_model/unicmp_gatv2_neigh/unicmp_split
+  OUT_PATH: ../dgl_model/unicmp_gatv2_neigh
   MODEL_PREFIX: model
   TEST_PREFIX: model
