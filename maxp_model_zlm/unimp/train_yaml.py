@@ -16,6 +16,7 @@ from sampler import MultiLayerInOutSampler
 from dgl.dataloading.pytorch import NodeDataLoader
 
 from unicmp import UniCMP
+from unicmp_se import UniCMP2
 from util import load_dgl_graph
 from optimization import OptimAdam
 from loss import LabelSmoothingLoss, AsymmetricLoss
@@ -42,7 +43,7 @@ def set_seed_logger(dataset_cfg):
 
 def init_model(model_cfg, device):
     if model_cfg['GNN_MODEL'] == 'unicmp':
-        model = UniCMP(
+        model = UniCMP2(
             input_size=model_cfg['INPUT_SIZE'],
             num_class=model_cfg['NUM_CLASS'],
             num_layers=model_cfg['NUM_LAYERS'],
@@ -150,7 +151,7 @@ def get_dataloader(dataset_cfg, graph, nid, drop=False):
     sample_graph = dgl.graph((src, dst), num_nodes=graph.number_of_nodes())
     sample_graph = dgl.add_self_loop(sample_graph)
 
-    if dataset_cfg['SAMPLER'] == 'in':
+    if dataset_cfg['SAMPLER'] == 'all':
         sampler = MultiLayerNeighborSampler(dataset_cfg['FANOUTS'])
     elif dataset_cfg['SAMPLER'] == 'in_out':
         sampler = MultiLayerInOutSampler(dataset_cfg['IN_FANOUTS'], dataset_cfg['OUT_FANOUTS'])
@@ -339,7 +340,7 @@ if __name__ == '__main__':
     criterion_cfg = config['CRITERION']
     dataset_cfg['K_FOLD'] = args.k_fold
 
-    dataset_cfg['OUT_PATH'] = dataset_cfg['OUT_PATH'] + str(dataset_cfg['K_FOLD'])
+    dataset_cfg['OUT_PATH'] = os.path.join(dataset_cfg['OUT_PATH'], 'split{:0>2d}'.format(dataset_cfg['K_FOLD']))
     os.makedirs(dataset_cfg['OUT_PATH'], exist_ok=True)
     os.system('cp {} {}/config.yaml'.format(yaml_path, dataset_cfg['OUT_PATH']))
 

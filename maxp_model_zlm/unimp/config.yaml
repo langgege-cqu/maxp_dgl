@@ -10,7 +10,6 @@ MODEL:
   GRAPH_DORP: 0.0
   ATTN_DROP: 0.0
   DROP: 0.2
-  # GAT_VERSION: 'v2' #v1
   USE_SAGE: True
   USE_CONV: False
   USE_ATTN: True
@@ -40,12 +39,13 @@ DATASET:
   DATA_PATH: ../dataset
   DEEPWALK_PATH: czw_deep_walk2.npy #deep_walk1.npy
   NEIGHBOR_FEATURES_PATH: features_neigh01.npy
-  K_FOLD: 2 #[0, 1, 2, 3, 4]
+  NEIGHBORS_CLASS_COUNT: normalized_neighbors_class_count.npy
+  K_FOLD: -1
   EPOCHS: 35
   BATCH_SIZE: 1024
   BIDIRECTED: True
   LOG_STEP: 200
-  SAMPLER: in #in_out #in
+  SAMPLER: all #in_out #all
   FANOUTS: [30, 30]
   IN_FANOUTS: [15, 15]
   OUT_FANOUTS: [15, 15]
@@ -56,6 +56,6 @@ DATASET:
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
   NORM_FEATURE: False
-  OUT_PATH: ../dgl_model/unicmp_gatv2_neigh/unicmp_split
+  OUT_PATH: ../dgl_model/unicmp_gatv2_neighbors_class
   MODEL_PREFIX: model
   TEST_PREFIX: model
