@@ -290,7 +290,7 @@ class UniCMP2(nn.Module):
 
         self.label_embed = nn.Embedding(num_class + 1, input_size, padding_idx=num_class)
         self.feat_mlp = nn.Sequential(
-            nn.Linear(2 * input_size + 2 + 8 + 128 + 48, hidden_size),
+            nn.Linear(2 * input_size + 2 + 8 + 128, hidden_size),
             LayerNorm(hidden_size),
             nn.ReLU(),
             nn.Dropout(drop),

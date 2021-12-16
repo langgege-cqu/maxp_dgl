@@ -57,7 +57,8 @@ def load_dgl_graph(dataset_cfg):
     neighbor_feat = th.from_numpy(np.load(os.path.join(base_path, dataset_cfg['NEIGHBOR_FEATURES_PATH']))).float()
     neighbors_class_count = th.from_numpy(np.load(os.path.join(base_path,
                                                                dataset_cfg['NEIGHBORS_CLASS_COUNT']))).float()
-    features = th.cat((node_feat, walk_feat, edge_feat, neighbor_feat, neighbors_class_count), dim=1)
+    # features = th.cat((node_feat, walk_feat, edge_feat, neighbor_feat, neighbors_class_count), dim=1)
+    features = th.cat((node_feat, walk_feat, edge_feat, neighbor_feat), dim=1)
     # features = th.cat((node_feat, walk_feat, edge_feat), dim=1)
 
     print('################ Feature info: ###############')

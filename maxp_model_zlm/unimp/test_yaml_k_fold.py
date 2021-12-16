@@ -16,6 +16,7 @@ from dgl.dataloading.neighbor import MultiLayerNeighborSampler
 from dgl.dataloading.pytorch import NodeDataLoader
 
 from unicmp import UniCMP
+from unicmp_se import UniCMP2
 from util import load_dgl_graph
 
 
@@ -31,7 +32,7 @@ def set_seed_logger(dataset_cfg):
 
 def init_model(model_cfg, device):
     if model_cfg['GNN_MODEL'] == 'unicmp':
-        model = UniCMP(
+        model = UniCMP2(
             input_size=model_cfg['INPUT_SIZE'],
             num_class=model_cfg['NUM_CLASS'],
             num_layers=model_cfg['NUM_LAYERS'],
@@ -101,9 +102,9 @@ def test_epoch(model, test_dataloader, node_feats, labels, n_classes, device):
             blocks = [block.to(device) for block in blocks]
             batch_logits = model(blocks, input_feats, input_labels)
             batch_logits = F.softmax(batch_logits, dim=-1)
-            result.append(batch_logits.detach().cpu().numpy())
+            result.extend(batch_logits.detach().cpu().numpy().tolist())
 
-    result = np.concatenate(result, axis=0)
+    # result = np.concatenate(result, axis=0)
     return result
 
 
@@ -112,7 +113,7 @@ def id2name(x):
 
 
 def test(model_cfg, dataset_cfg, device, graph_data):
-
+    set_seed_logger(dataset_cfg)
     graph, labels, train_nid, val_nid, test_nid, node_feats = graph_data
 
     test_dataloader, node_feats, labels = get_dataloader(dataset_cfg, graph_data)
@@ -125,7 +126,6 @@ def test(model_cfg, dataset_cfg, device, graph_data):
 
         model_cfg['CHECKPOINT'] = checkpoint_path
 
-        set_seed_logger(dataset_cfg)
         model = init_model(model_cfg, device)
         print('Model config', str(dict(model_cfg)))
         print('Dataset config', str(dict(model_cfg)))
