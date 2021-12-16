@@ -16,6 +16,7 @@ from dgl.dataloading.neighbor import MultiLayerNeighborSampler
 from dgl.dataloading.pytorch import NodeDataLoader
 
 from unicmp import UniCMP
+from unicmp_se import UniCMP2
 from util import load_dgl_graph
 
 
@@ -31,7 +32,7 @@ def set_seed_logger(dataset_cfg):
 
 def init_model(model_cfg, device):
     if model_cfg['GNN_MODEL'] == 'unicmp':
-        model = UniCMP(
+        model = UniCMP2(
             input_size=model_cfg['INPUT_SIZE'],
             num_class=model_cfg['NUM_CLASS'],
             num_layers=model_cfg['NUM_LAYERS'],
@@ -148,7 +149,7 @@ if __name__ == '__main__':
 
     dataset_cfg['K_FOLD'] = args.k_fold
 
-    dataset_cfg['OUT_PATH'] = dataset_cfg['OUT_PATH'] + str(dataset_cfg['K_FOLD'])
+    dataset_cfg['OUT_PATH'] = os.path.join(dataset_cfg['OUT_PATH'], 'split{:0>2d}'.format(dataset_cfg['K_FOLD']))
 
     device = th.device('cuda') if th.cuda.is_available() else th.device('cpu')
     dataset_cfg['BATCH_SIZE'] = int(dataset_cfg['BATCH_SIZE'] / dataset_cfg['GRADIENT_ACCUMULATION_STEPS'])
