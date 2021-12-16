@@ -1,0 +1,60 @@
+MODEL:
+  GNN_MODEL: unicmp
+  INPUT_SIZE: 300
+  NUM_LAYERS: 2
+  NUM_HEADS: 8
+  HIDDEN_SIZE: 512
+  NUM_CLASS: 23
+  LABEL_DROP: 0.1
+  FEAT_DORP: 0.05
+  GRAPH_DORP: 0.0
+  ATTN_DROP: 0.0
+  DROP: 0.2
+  USE_SAGE: True
+  USE_CONV: False
+  USE_ATTN: True
+  USE_RESNET: True
+  USE_DESNET: True
+  CHECKPOINT: ../dgl_model/unicmp/unicmp_split_2/models/gatv2_deepwalk2_unicmp_split2_epoch20_val6361.pth
+  CHECKPOINTS: [../dgl_model/unicmp/unicmp_split_0/models/gatv2_deepwalk2_unicmp_split2_epoch21_val6367.pth, ../dgl_model/unicmp/unicmp_split_1/models/gatv2_deepwalk2_unicmp_split2_epoch19_val6340.pth, ../dgl_model/unicmp/unicmp_split_2/models/gatv2_deepwalk2_unicmp_split2_epoch20_val6361.pth, ../dgl_model/unicmp/unicmp_split_3/models/gatv2_deepwalk2_unicmp_split2_epoch20_val6333.pth]
+  CHECKPOINTS1: [../dgl_model/unicmp/unicmp_split_0/models/gatv2_deepwalk2_unicmp_split2_epoch21_val6367.pth, ../dgl_model/unicmp/unicmp_split_1/models/gatv2_deepwalk2_unicmp_split2_epoch19_val6340.pth, ../dgl_model/unicmp/unicmp_split_2/models/gatv2_deepwalk2_unicmp_split2_epoch20_val6361.pth, ../dgl_model/unicmp/unicmp_split_3/models/gatv2_deepwalk2_unicmp_split2_epoch20_val6333.pth]
+  CHECKPOINTS2: [../dgl_model/unicmp/unicmp_split_0/models/unicmp_split2_epoch22_val6359.pth, ../dgl_model/unicmp/unicmp_split_1/models/unicmp_split2_epoch20_val6339.pth, ../dgl_model/unicmp/unicmp_split_2/models/unicmp_split2_epoch20_val6361.pth, ../dgl_model/unicmp/unicmp_split_3/models/unicmp_split2_epoch20_val6328.pth]
+  CHECKPOINTS3: [../dgl_model/unicmp/unicmp_split_0/models/deepwalk1_unicmp_split2_epoch19_val6354.pth, ../dgl_model/unicmp/unicmp_split_1/models/deepwalk1_unicmp_split2_epoch21_val6337.pth, ../dgl_model/unicmp/unicmp_split_2/models/deepwalk1_unicmp_split2_epoch21_val6351.pth, ../dgl_model/unicmp/unicmp_split_3/models/deepwalk1_unicmp_split2_epoch18_val6327.pth]
+  CHECKPOINTS4: [../dgl_model/unicmp/unicmp_split_0/models/gatv2_deepwalk1_unicmp_split2_epoch18_val6369.pth, ../dgl_model/unicmp/unicmp_split_1/models/gatv2_deepwalk1_unicmp_split2_epoch19_val6340.pth, ../dgl_model/unicmp/unicmp_split_2/models/gatv2_deepwalk1_unicmp_split2_epoch19_val6358.pth, ../dgl_model/unicmp/unicmp_split_3/models/gatv2_deepwalk1_unicmp_split2_epoch18_val6327.pth]
+
+
+OPTIMIZER:
+  LEARNING_RATE: 0.0005
+  COEF_LR: 1.0
+  SCHEDULE: warmup_linear
+  WEIGHT_DECAY: 0.0001
+  WARMUP_PROPORTION: 0.1
+
+
+CRITERION:
+  LOSS_TYPE: CL
+  NUM_CLASS: 23
+  GAMMA_NEG: 4
+  GAMMA_POS: 1
+  SMOOTHING: 0.1
+
+
+DATASET:
+  SEED: 2021
+  DATA_PATH: ../dataset/
+  EPOCHS: 30
+  BATCH_SIZE: 1024
+  LOG_STEP: 200
+  FANOUTS: [30, 30]
+  NUM_CLASS: 23
+  REPLACE_LABEL: 0.04
+  MASK_LABEL: 0.16
+  EDGE_DROP: 0.2
+  NUM_WORKERS: 2
+  GRADIENT_ACCUMULATION_STEPS: 1
+  NORM_FEATURE: False
+  OUT_PATH: ../dgl_model/unicmp/unicmp_split
+  K_FOLD_PATH: ../test_result/se_16.csv
+  MODEL_PREFIX: unicmp_split2
+  TEST_PREFIX: unicmp_split2
+  K_FOLD: 2 # [0, 1, 2, 3, 4]
