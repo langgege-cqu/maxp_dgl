@@ -28,6 +28,41 @@ def linear_init_layers(layer):
     weight_bound = math.sqrt(3.0) * std
     nn.init.uniform_(layer.weight, a=-weight_bound, b=weight_bound)
     
+
+
+class Se(nn.Module):
+    def __init__(self, feature_1, feature_2):
+        super().__init__()
+        self.se = nn.Sequential(
+            nn.Linear(feature_1, feature_2),
+            nn.BatchNorm1d(feature_2),
+            nn.Sigmoid()
+        )
+    
+    def forward(self, features):
+        return self.se(features)
+
+class Mul(nn.Module):
+    def __init__(self, h, feature_size_1, feature_size_2):
+        super().__init__()
+        self.h = h
+        self.se = nn.ModuleList()
+        for i in range(h):
+            self.se.append(Se(feature_size_1 * h, feature_size_2))
+    
+    def forward(self, features):
+        # features = torch.nn.functional.normalize(features, p=2, dim=2)
+        b, l, dim = features.shape
+        se_features = torch.reshape(features, (b, -1))
+        weight = []
+        for i in range(self.h):
+            se_weight = self.se[i](se_features)
+            weight.append(se_weight)
+        weight = torch.stack(weight, dim=1)
+        mul_features = torch.mul(features, weight)
+        mul_features = torch.sum(mul_features, dim=1)
+        return mul_features
+
     
 class LayerNorm(nn.Module):
     def __init__(self, hidden_size, eps=1e-12):
@@ -89,7 +124,7 @@ class GraphAttnLayer(nn.Module):
     def __init__(self, in_feats, out_feats, num_heads, activation=F.elu, 
                  attn_drop=0, dropout=0):
         super(GraphAttnLayer, self).__init__()
-        self.graph = dglnn.GATConv(in_feats=in_feats, out_feats=out_feats // num_heads,
+        self.graph = dglnn.GATv2Conv(in_feats=in_feats, out_feats=out_feats // num_heads,
                                    num_heads=num_heads, attn_drop=attn_drop)
         self.norm = LayerNorm(out_feats)
         self.activation = activation
@@ -170,47 +205,15 @@ class MultiHeadedAttention(nn.Module):
         return context_layer
     
     
-class Se(nn.Module):
-    def __init__(self, feature_1, feature_2):
-        super().__init__()
-        self.se = nn.Sequential(
-            nn.Linear(feature_1, feature_2),
-            nn.BatchNorm1d(feature_2),
-            nn.Sigmoid()
-        )
-    
-    def forward(self, features):
-        return self.se(features)
-
-class Mul(nn.Module):
-    def __init__(self, h, feature_size_1, feature_size_2):
-        super().__init__()
-        self.h = h
-        self.se = nn.ModuleList()
-        for i in range(h):
-            self.se.append(Se(feature_size_1 * h, feature_size_2))
-    
-    def forward(self, features):
-        # features = torch.nn.functional.normalize(features, p=2, dim=2)
-        b, l, dim = features.shape
-        se_features = torch.reshape(features, (b, -1))
-        weight = []
-        for i in range(self.h):
-            se_weight = self.se[i](se_features)
-            weight.append(se_weight)
-        weight = torch.stack(weight, dim=1)
-        mul_features = torch.mul(features, weight)
-        mul_features = torch.sum(mul_features, dim=1)
-        return mul_features
-
-class UniCMP(nn.Module):
+class UniCMP2(nn.Module):
 
     def __init__(self, input_size, num_class, num_layers=2, num_heads=4, hidden_size=512,
                  label_drop=0.1, feat_drop=0., graph_drop=0., attn_drop=0., drop=0.2, 
                  use_sage=True, use_conv=True, use_attn=True, use_resnet=True,
                  use_densenet=True
                 ):
-        super(UniCMP, self).__init__()
+        super(UniCMP2, self).__init__()
+        self.input_size = input_size
         self.num_layers = num_layers
         self.use_sage = use_sage
         self.use_conv = use_conv
@@ -225,6 +228,7 @@ class UniCMP(nn.Module):
                     self.graphsage.append(GraphSageLayer(input_size, hidden_size, dropout=graph_drop))
                 else:
                     self.graphsage.append(GraphSageLayer(hidden_size, hidden_size, dropout=graph_drop))
+            
         if use_conv:
             self.graphconv = nn.ModuleList()
             for i in range(num_layers):
@@ -264,15 +268,14 @@ class UniCMP(nn.Module):
             self.attn_layers.append(MultiHeadedAttention(num_heads, hidden_size, attn_drop))
         self.se_mul_layers = nn.ModuleList()
         for i in range(num_layers):
-            self.se_mul_layers.append(Mul(i+2, hidden_size, hidden_size))
-
+            self.se_mul_layers.append(Mul(i+3, hidden_size, hidden_size))
         self.norm_layers = nn.ModuleList()
         for i in range(num_layers):
             self.norm_layers.append(LayerNorm(hidden_size))
         
         self.label_embed = nn.Embedding(num_class + 1, input_size, padding_idx=num_class)
         self.feat_mlp = nn.Sequential(
-            nn.Linear(2 * input_size, hidden_size),
+            nn.Linear(2 * input_size + 2 + 8 + 128, hidden_size),
             LayerNorm(hidden_size),
             nn.ReLU(),
             nn.Dropout(drop),
@@ -286,7 +289,7 @@ class UniCMP(nn.Module):
             nn.Dropout(drop),
             nn.Linear(hidden_size, num_class),
         )
-        self.fc = nn.Linear(hidden_size, num_class)
+        
         self.label_dropout = nn.Dropout(label_drop)
         self.feat_dropout = nn.Dropout(feat_drop)
         self.dropout = nn.Dropout(drop)
@@ -304,12 +307,13 @@ class UniCMP(nn.Module):
     def forward(self, blocks, input_feats, input_labels):
         input_labels = self.label_embed(input_labels)
         input_labels = self.label_dropout(input_labels)
-        input_feats = self.feat_dropout(input_feats)
-        feature = torch.cat([input_labels, input_feats], dim=1)
+        
+        node_feats, graph_feats = input_feats[:, :self.input_size], input_feats[:, self.input_size:]
+        node_feats = self.feat_dropout(node_feats)
+        feature = torch.cat([input_labels, node_feats, graph_feats], dim=1)
         feature = self.feat_mlp(feature)
         
         logits = [feature]
-
         for l in range(self.num_layers):
             hidden = []
             
@@ -335,12 +339,11 @@ class UniCMP(nn.Module):
                 hidden.append(h4)
         
             h = torch.stack(hidden, dim=1)
-            
             # h = self.attn_layers[l](h)[:, 0]
             h = self.se_mul_layers[l](h)
             h = self.norm_layers[l](h)
             h = self.dropout(h)
             logits.append(h)
-    
+
         output = self.head(logits[-1])
         return output
