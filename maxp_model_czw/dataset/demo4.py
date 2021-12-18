@@ -60,7 +60,7 @@ def feat_map(i):
 localtime = time.asctime(time.localtime(time.time()))
 print('Start Extract', localtime)
 
-workers = 20
+workers = 8
 with Pool(workers) as p:
     rets = p.map(feat_map, range(graph.num_nodes()))
     
