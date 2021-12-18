@@ -53,14 +53,14 @@ def feat_map(i):
     tensor_list = []
     for k in node_list:
         tensor = torch.FloatTensor([
-            edge_feat[graph.predecessors(i), 0].mean().item(), 
-            edge_feat[graph.predecessors(i), 0].std().item(), 
-            edge_feat[graph.predecessors(i), 1].mean().item(), 
-            edge_feat[graph.predecessors(i), 1].std().item(), 
-            edge_feat[graph.successors(i), 0].mean().item(), 
-            edge_feat[graph.successors(i), 0].std().item(),
-            edge_feat[graph.successors(i), 1].mean().item(),
-            edge_feat[graph.successors(i), 1].std().item(),
+            edge_feat[graph.predecessors(k), 0].mean().item(), 
+            edge_feat[graph.predecessors(k), 0].std().item(), 
+            edge_feat[graph.predecessors(k), 1].mean().item(), 
+            edge_feat[graph.predecessors(k), 1].std().item(), 
+            edge_feat[graph.successors(k), 0].mean().item(), 
+            edge_feat[graph.successors(k), 0].std().item(),
+            edge_feat[graph.successors(k), 1].mean().item(),
+            edge_feat[graph.successors(k), 1].std().item(),
         ])
         tensor_list.append(tensor)
     tensor_list = torch.stack(tensor_list, dim=0)
@@ -82,8 +82,8 @@ print('features_neigh', features_neigh.shape)
 
 
 features_neigh = torch.cat((edge_feat, features_neigh), dim=1).numpy()
+features_neigh[np.isnan(features_neigh)] = 0.0
 print('total feature', features_neigh.shape)
-
 
 features_neigh_path = os.path.join(base_path, publish_path, 'features_neigh.npy')
 with open(features_neigh_path, 'wb') as f:
