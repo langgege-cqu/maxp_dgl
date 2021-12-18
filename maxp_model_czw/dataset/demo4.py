@@ -12,6 +12,7 @@ import torch
 import dgl
 
 
+
 def set_seed(seed):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -43,26 +44,34 @@ edge_feat = torch.cat((
 ), dim=1)
 print('edge_feat', edge_feat.shape)
 
+workers = 20
+segs = np.linspace(0, graph.num_nodes(), num=workers + 1, endpoint=True, dtype=int)
 
 def feat_map(i):
-    return torch.FloatTensor([
-        edge_feat[graph.predecessors(i), 0].mean().item(), 
-        edge_feat[graph.predecessors(i), 0].std().item(), 
-        edge_feat[graph.predecessors(i), 1].mean().item(), 
-        edge_feat[graph.predecessors(i), 1].std().item(), 
-        edge_feat[graph.successors(i), 0].mean().item(), 
-        edge_feat[graph.successors(i), 0].std().item(),
-        edge_feat[graph.successors(i), 1].mean().item(),
-        edge_feat[graph.successors(i), 1].std().item(),
-    ])
-
+    node_list = list(range(segs[i], segs[i + 1]))
+    
+    tensor_list = []
+    for k in node_list:
+        tensor = torch.FloatTensor([
+            edge_feat[graph.predecessors(i), 0].mean().item(), 
+            edge_feat[graph.predecessors(i), 0].std().item(), 
+            edge_feat[graph.predecessors(i), 1].mean().item(), 
+            edge_feat[graph.predecessors(i), 1].std().item(), 
+            edge_feat[graph.successors(i), 0].mean().item(), 
+            edge_feat[graph.successors(i), 0].std().item(),
+            edge_feat[graph.successors(i), 1].mean().item(),
+            edge_feat[graph.successors(i), 1].std().item(),
+        ])
+        tensor_list.append(tensor)
+    tensor_list = torch.stack(tensor_list, dim=0)
+    return tensor_list
+    
 
 localtime = time.asctime(time.localtime(time.time()))
 print('Start Extract', localtime)
 
-workers = 8
 with Pool(workers) as p:
-    rets = p.map(feat_map, range(graph.num_nodes()))
+    rets = p.map(feat_map, range(workers))
     
 localtime = time.asctime(time.localtime(time.time()))
 print('End Extract', localtime)
