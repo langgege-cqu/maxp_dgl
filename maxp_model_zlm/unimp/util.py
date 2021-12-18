@@ -46,6 +46,10 @@ def load_dgl_graph(dataset_cfg):
             val_label_idx = label_data['val_label_idx'][k]
             test_label_idx = label_data['test_label_idx']
 
+    # 使用伪标签
+    if dataset_cfg['PSEUDO_LABEL']:
+        labels = th.from_numpy(np.load(os.path.join(base_path, 'new_labels.npy')))
+
     print('################ Label info: ################')
     print('Total labels (including not labeled): {}'.format(labels.shape[0]))
     print('               Training label number: {}'.format(tr_label_idx.shape[0]))

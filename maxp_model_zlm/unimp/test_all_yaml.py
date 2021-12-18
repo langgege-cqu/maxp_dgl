@@ -1,5 +1,6 @@
 import os
 import sys
+import torch
 import yaml
 import random
 import argparse
@@ -63,8 +64,9 @@ def init_model(model_cfg, device):
 def get_dataloader(dataset_cfg, graph_data):
     graph, labels, train_nid, val_nid, test_nid, node_feat = graph_data
     sampler = MultiLayerNeighborSampler(dataset_cfg['FANOUTS'])
+    nids = torch.range(0, graph.num_nodes() - 1, dtype=torch.int64)
     test_dataloader = NodeDataLoader(
-        graph, test_nid, sampler, batch_size=dataset_cfg['BATCH_SIZE'], shuffle=False, drop_last=False, num_workers=0
+        graph, nids, sampler, batch_size=dataset_cfg['BATCH_SIZE'], shuffle=False, drop_last=False, num_workers=0
     )
 
     return test_dataloader, node_feat, labels
@@ -112,48 +114,25 @@ def id2name(x):
 
 def test(model_cfg, dataset_cfg, device, graph_data):
     set_seed_logger(dataset_cfg)
-
     graph, labels, train_nid, val_nid, test_nid, node_feats = graph_data
+
     test_dataloader, node_feats, labels = get_dataloader(dataset_cfg, graph_data)
-
-    k_fold_result = []
-
-    for checkpoint_path in model_cfg['CHECKPOINT_LIST']:
-        checkpoint_path = os.path.join(model_cfg['CHECKPOINT_BASE'], checkpoint_path)
-        print('Test checkpoint', checkpoint_path)
-
-        model_cfg['CHECKPOINT'] = checkpoint_path
-        model = init_model(model_cfg, device)
-        print('Model config', str(dict(model_cfg)))
-        print('Dataset config', str(dict(model_cfg)))
-
-        result = test_epoch(model, test_dataloader, node_feats, labels, model_cfg['NUM_CLASS'], device)
-        k_fold_result.append(result)
-
-    # 保存每一折的结果
-    k_fold_result = np.array(k_fold_result)
-    result_npy_path = os.path.join(
-        dataset_cfg['OUT_PATH'], '{}_{}_fold.npy'.format(dataset_cfg['TEST_PREFIX'], len(model_cfg['CHECKPOINT_LIST']))
-    )
-    np.save(result_npy_path, k_fold_result)
-
-    # 保存id label
-    k_fold_result = np.mean(k_fold_result, axis=0)
-    result = np.argmax(k_fold_result, axis=-1)
-    df = pd.DataFrame({'node_idx': test_nid, 'label': result})
+    model = init_model(model_cfg, device)
+    print('Model config', str(dict(model_cfg)))
+    print('Dataset config', str(dict(model_cfg)))
 
     nodes_path = os.path.join(dataset_cfg['DATA_PATH'], 'IDandLabels.csv')
     nodes_df = pd.read_csv(nodes_path, dtype={'Label': str})
-    df['label'] = df['label'].apply(id2name)
-    mged = pd.merge(df, nodes_df[['node_idx', 'paper_id']], on='node_idx', how='left')
 
-    result_csv = os.path.join(dataset_cfg['OUT_PATH'], '{}.csv'.format(dataset_cfg['TEST_PREFIX']))
-    pd.DataFrame({'id': mged['paper_id'], 'label': mged['label']}).to_csv(result_csv, index=False)
+    result = test_epoch(model, test_dataloader, node_feats, labels, model_cfg['NUM_CLASS'], device)
+    result_npy = os.path.join(dataset_cfg['OUT_PATH'], '{}.npy'.format(dataset_cfg['TEST_PREFIX']))
+    np.save(result_npy, result)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Graph Node Classification')
     parser.add_argument('--cfg_file', type=str, help="Path of config files.")
+    parser.add_argument('--k_fold', type=int, default=0, help="k_fold")
     args = parser.parse_args()
     yaml_path = args.cfg_file
 
@@ -161,6 +140,10 @@ if __name__ == '__main__':
         config = yaml.load(f.read(), Loader=yaml.FullLoader)
     model_cfg = config['MODEL']
     dataset_cfg = config['DATASET']
+
+    dataset_cfg['K_FOLD'] = args.k_fold
+
+    dataset_cfg['OUT_PATH'] = os.path.join(dataset_cfg['OUT_PATH'], 'split{:0>2d}'.format(dataset_cfg['K_FOLD']))
 
     device = th.device('cuda') if th.cuda.is_available() else th.device('cpu')
     dataset_cfg['BATCH_SIZE'] = int(dataset_cfg['BATCH_SIZE'] / dataset_cfg['GRADIENT_ACCUMULATION_STEPS'])

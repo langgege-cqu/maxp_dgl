@@ -40,8 +40,10 @@ DATASET:
   DEEPWALK_PATH: czw_deep_walk2.npy #deep_walk1.npy
   NEIGHBOR_FEATURES_PATH: features_neigh01.npy
   NEIGHBORS_CLASS_COUNT: normalized_neighbors_class_count.npy
+  PSEUDO_LABEL_PATH: new_labels.npy
+  PSEUDO_LABEL: True
   K_FOLD: -1
-  EPOCHS: 35
+  EPOCHS: 30
   BATCH_SIZE: 1024
   BIDIRECTED: True
   LOG_STEP: 200
@@ -56,6 +58,6 @@ DATASET:
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
   NORM_FEATURE: False
-  OUT_PATH: ../dgl_model/unicmp_gatv2_edge
+  OUT_PATH: ../dgl_model/unicmp_gatv2_pseudo
   MODEL_PREFIX: model
-  TEST_PREFIX: model
+  TEST_PREFIX: unicmp_gatv2_pseudo
