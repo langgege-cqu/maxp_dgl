@@ -21,7 +21,7 @@ MODEL:
   GATV2: True
   CHECKPOINT: ''
   CHECKPOINT_BASE: ../dgl_models/deepwalk1_unimp
-  CHECKPOINT_LIST: ['split4/models/unimp_epoch02_val6045.pth']
+  CHECKPOINT_LIST: ['split4/models/unimp_epoch01_val5953.pth']
 
 OPTIMIZER:
   LEARNING_RATE: 0.0005

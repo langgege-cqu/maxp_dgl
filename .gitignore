@@ -1,5 +1,6 @@
 /data
 *.log
+log
 dgl_model
 dgl_models
 dataset
