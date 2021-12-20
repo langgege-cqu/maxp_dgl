@@ -38,7 +38,7 @@ edge_df2 = pd.read_csv(link_p2_path)
 print('\nedge_df2:\n', edge_df2)
 edge_df = pd.concat((edge_df1, edge_df2), ignore_index=True)
 print('\nedge_df:\n', edge_df)
-nid_label_df.to_csv(os.path.join(base_path, publish_path, 'link_phase.csv'), index=False)
+edge_df.to_csv(os.path.join(base_path, publish_path, 'link_phase.csv'), index=False)
 
 
 print('=' * 50)

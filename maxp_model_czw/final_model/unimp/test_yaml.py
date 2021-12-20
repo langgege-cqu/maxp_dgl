@@ -91,6 +91,7 @@ def test_epoch(model, test_dataloader, node_feats, labels, n_classes, device):
                                                                      n_classes, device)
             blocks = [block.to(device) for block in blocks]
             batch_logits = model(blocks, input_feats, input_labels)
+            batch_logits = F.softmax(batch_logits, dim=-1)
             result.append(batch_logits.detach().cpu().numpy())
             
     result = np.concatenate(result, axis=0)
@@ -110,7 +111,7 @@ def test(model_cfg, dataset_cfg, device, graph_data):
     print('Model config', str(dict(model_cfg)))
     print('Dataset config', str(dict(model_cfg)))
     
-    nodes_path = os.path.join('../dataset', 'IDandLabels.csv')
+    nodes_path = os.path.join('../final_dataset', 'IDandLabels.csv')
     nodes_df = pd.read_csv(nodes_path, dtype={'Label':str})
         
     result = test_epoch(model, test_dataloader, node_feats, labels, model_cfg['NUM_CLASS'], device)
