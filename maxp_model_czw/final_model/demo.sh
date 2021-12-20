@@ -20,11 +20,11 @@ python demo2.py
 python demo3.py
 # demo4分层抽样5折划分数据集
 python demo4.py
-# demo5提取并保存出入度以及一阶二阶特征
+# demo5提取并保存出入度以及一阶二阶特征,总维度2+8=10
 python demo5.py
 
 
-# 提取并保存deep walk特征
+# 提取并保存deep walk特征，总维度128
 cd /hetu_group/wuxiangyu/cx/language_model/DGL/dgl_maxp_model/deep_walk
 bash run.sh
 
