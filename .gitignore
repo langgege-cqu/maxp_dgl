@@ -1,6 +1,7 @@
 /data
 *.log
 dgl_model
+dgl_models
 dataset
 graphmodel
 test_result

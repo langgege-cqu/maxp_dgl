@@ -20,7 +20,7 @@ MODEL:
   USE_SEMUL: True
   GATV2: True
   CHECKPOINT: ''
-  CHECKPOINT_BASE: ../final_models/deepwalk1
+  CHECKPOINT_BASE: ../dgl_models/deepwalk1
   CHECKPOINT_LIST: ['unimp_split4/models/unimp_epoch01_val5957.pth']
 
 OPTIMIZER:
