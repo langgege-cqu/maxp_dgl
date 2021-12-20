@@ -1,7 +1,7 @@
 MODEL:
   GNN_MODEL: unimp
   INPUT_SIZE: 300
-  FEAT_SIZE: 738
+  FEAT_SIZE: 736
   NUM_CLASS: 23
   NUM_LAYERS: 2
   NUM_HEADS: 8
@@ -20,8 +20,8 @@ MODEL:
   USE_SEMUL: True
   GATV2: True
   CHECKPOINT: ''
-  CHECKPOINT_BASE: ../dgl_models/deepwalk1
-  CHECKPOINT_LIST: ['unimp_split4/models/unimp_epoch01_val5957.pth']
+  CHECKPOINT_BASE: ../dgl_models/deepwalk1_unimp
+  CHECKPOINT_LIST: ['split4/models/unimp_epoch02_val6045.pth']
 
 OPTIMIZER:
   LEARNING_RATE: 0.0005
@@ -46,7 +46,7 @@ DATASET:
   LABEL_PATH: ../final_dataset/label_split
   NODE_PATH: ../final_dataset/features.npy
   WALK_PATH: ../final_dataset/deep_walk1.npy
-  EDGE_PATH: ../final_dataset/features_neigh.npy
+  EDGE_PATH: ../final_dataset/features_neigh01.npy
   EPOCHS: 50
   BATCH_SIZE: 1600
   LOG_STEP: 200
@@ -57,6 +57,6 @@ DATASET:
   EDGE_DROP: 0.2
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
-  OUT_PATH: ../final_models/deepwalk1_unimp
+  OUT_PATH: ../dgl_models/deepwalk1_unimp
   MODEL_PREFIX: unimp
   TEST_PREFIX: unimp

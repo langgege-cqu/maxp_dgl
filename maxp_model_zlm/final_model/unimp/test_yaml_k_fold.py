@@ -146,7 +146,7 @@ def test(model_cfg, dataset_cfg, device, graph_data):
     result = np.argmax(k_fold_result, axis=-1)
     df = pd.DataFrame({'node_idx': test_nid, 'label': result})
 
-    nodes_path = os.path.join(dataset_cfg['DATA_PATH'], 'IDandLabels.csv')
+    nodes_path = os.path.join('../final_dataset', 'IDandLabels.csv')
     nodes_df = pd.read_csv(nodes_path, dtype={'Label': str})
     df['label'] = df['label'].apply(id2name)
     mged = pd.merge(df, nodes_df[['node_idx', 'paper_id']], on='node_idx', how='left')

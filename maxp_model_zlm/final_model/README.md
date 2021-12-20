@@ -15,8 +15,6 @@ bash preprocess.sh
 ```
 
 # K折训练
-进入`unimp`文件夹
-
 修改`config.yaml`中的
 1. `DATASET.WALK_PATH`
 2. `DATASET.OUT_PATH`
@@ -31,8 +29,6 @@ bash k_fold_train.sh
 训练的模型位于`final_model/final_models/[xxx]/split[x]/models`
 
 # K折预测
-进入`unimp`文件夹
-
 修改`config.yaml`中的
 1. `MODEL.CHECKPOINT_BASE`
 2. `MODEL.CHECKPOINT_LIST`
