@@ -60,6 +60,7 @@ val_labels_idx = [np.array([0]) for _ in range(split)]
 
 for label in range(len(label2idx)):
     label_idx = tr_val_labels_df[tr_val_labels_df.label == label].node_idx.to_numpy()
+    # np.random.shuffle(label_idx)
     segs = np.linspace(0, label_idx.shape[0], num=split + 1, endpoint=True, dtype=int)
     
     for i in range(split): 
