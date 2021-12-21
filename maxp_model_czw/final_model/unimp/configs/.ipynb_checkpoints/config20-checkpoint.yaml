@@ -1,0 +1,56 @@
+MODEL:
+  GNN_MODEL: unicmp
+  INPUT_SIZE: 300
+  NUM_LAYERS: 2
+  NUM_HEADS: 8
+  HIDDEN_SIZE: 512
+  NUM_CLASS: 23
+  LABEL_DROP: 0.1
+  FEAT_DORP: 0.05
+  GRAPH_DORP: 0.0
+  ATTN_DROP: 0.0
+  DROP: 0.2
+  USE_SAGE: True
+  USE_CONV: False
+  USE_ATTN: True
+  USE_RESNET: True
+  USE_DESNET: True
+  CHECKPOINT: ''
+
+
+OPTIMIZER:
+  LEARNING_RATE: 0.0005
+  COEF_LR: 1.0
+  SCHEDULE: warmup_linear
+  WEIGHT_DECAY: 0.0001
+  WARMUP_PROPORTION: 0.1
+
+
+CRITERION:
+  LOSS_TYPE: CL
+  NUM_CLASS: 23
+  GAMMA_NEG: 4
+  GAMMA_POS: 1
+  SMOOTHING: 0.1
+
+
+DATASET:
+  SEED: 100
+  GRAPH_PATH: ../dataset/graph.bin
+  LABEL_PATH: ../dataset/label/label_split5.pkl
+  NODE_PATH: ../dataset/features.npy
+  WALK_PATH: ../deep_walk/deep_walk2.npy
+  EPOCHS: 50
+  BATCH_SIZE: 1600
+  LOG_STEP: 200
+  FANOUTS: [30, 30]
+  NUM_CLASS: 23
+  REPLACE_LABEL: 0.04
+  MASK_LABEL: 0.16
+  EDGE_DROP: 0.2
+  NUM_WORKERS: 2
+  GRADIENT_ACCUMULATION_STEPS: 1
+  NORM_FEATURE: False
+  OUT_PATH: ../unimps/v2_deepwalk2/unicmp_split5
+  MODEL_PREFIX: unicmp_split5
+  TEST_PREFIX: unicmp_split5
