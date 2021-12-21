@@ -43,10 +43,10 @@ DATASET:
   SEED: 2021
   K_FOLD: -1
   GRAPH_PATH: ../final_dataset/graph.bin
-  LABEL_PATH: ../final_dataset/label_split
+  LABEL_PATH: ../final_dataset/order_labels/label_split
   NODE_PATH: ../final_dataset/features.npy
   WALK_PATH: ../final_dataset/deep_walk1.npy
-  EDGE_PATH: ../final_dataset/features_neigh01.npy
+  EDGE_PATH: ../final_dataset/features_neigh.npy
   EPOCHS: 50
   BATCH_SIZE: 1600
   LOG_STEP: 200
@@ -57,6 +57,6 @@ DATASET:
   EDGE_DROP: 0.2
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
-  OUT_PATH: ../dgl_models/deepwalk1_unimp
-  MODEL_PREFIX: unimp
-  TEST_PREFIX: unimp
+  OUT_PATH: ../dgl_models/final/deepwalk1_gat2_se
+  MODEL_PREFIX: deepwalk1_gat2_se
+  TEST_PREFIX: deepwalk1_gat2_se
