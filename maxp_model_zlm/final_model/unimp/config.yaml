@@ -18,9 +18,9 @@ MODEL:
   USE_RESNET: True
   USE_DESNET: True
   USE_SEMUL: True
-  GATV2: True
+  GATV2: False
   CHECKPOINT: ''
-  CHECKPOINT_BASE: ../dgl_models/deepwalk1_unimp
+  CHECKPOINT_BASE: ../dgl_models/order_deepwalk2_gat1_se
   CHECKPOINT_LIST: ['split4/models/unimp_epoch01_val5953.pth']
 
 OPTIMIZER:
@@ -45,10 +45,10 @@ DATASET:
   GRAPH_PATH: ../final_dataset/graph.bin
   LABEL_PATH: ../final_dataset/order_labels/label_split
   NODE_PATH: ../final_dataset/features.npy
-  WALK_PATH: ../final_dataset/deep_walk1.npy
+  WALK_PATH: ../final_dataset/deep_walk2.npy
   EDGE_PATH: ../final_dataset/features_neigh.npy
   EPOCHS: 50
-  BATCH_SIZE: 1600
+  BATCH_SIZE: 1024
   LOG_STEP: 200
   FANOUTS: [30, 30]
   NUM_CLASS: 23
@@ -57,6 +57,6 @@ DATASET:
   EDGE_DROP: 0.2
   NUM_WORKERS: 2
   GRADIENT_ACCUMULATION_STEPS: 1
-  OUT_PATH: ../dgl_models/final/deepwalk1_gat2_se
-  MODEL_PREFIX: deepwalk1_gat2_se
-  TEST_PREFIX: deepwalk1_gat2_se
+  OUT_PATH: ../dgl_models/final/order_deepwalk2_gat1_se
+  MODEL_PREFIX: models
+  TEST_PREFIX: order_deepwalk2_gat1_se

@@ -106,7 +106,7 @@ def test_epoch(model, test_dataloader, node_feats, labels, n_classes, device):
             blocks = [block.to(device) for block in blocks]
             batch_logits = model(blocks, input_feats, input_labels)
             batch_logits = F.softmax(batch_logits, dim=-1)
-            result.extend(batch_logits.detach().cpu().numpy().tolist())
+            result.extend(batch_logits.detach().cpu().numpy())
     return result
 
 
@@ -122,7 +122,7 @@ def test(model_cfg, dataset_cfg, device, graph_data):
 
     k_fold_result = []
 
-    for checkpoint_path in model_cfg['CHECKPOINT_LIST']:
+    for index, checkpoint_path in enumerate(model_cfg['CHECKPOINT_LIST']):
         checkpoint_path = os.path.join(model_cfg['CHECKPOINT_BASE'], checkpoint_path)
         print('Test checkpoint', checkpoint_path)
 
@@ -132,6 +132,11 @@ def test(model_cfg, dataset_cfg, device, graph_data):
         print('Dataset config', str(dict(model_cfg)))
 
         result = test_epoch(model, test_dataloader, node_feats, labels, model_cfg['NUM_CLASS'], device)
+        result = np.array(result)
+        result_npy_path = os.path.join(
+            dataset_cfg['OUT_PATH'], '{}_fold{}.npy'.format(dataset_cfg['TEST_PREFIX'], index)
+        )
+        np.save(result_npy_path, result)
         k_fold_result.append(result)
 
     # 保存每一折的结果
@@ -142,17 +147,17 @@ def test(model_cfg, dataset_cfg, device, graph_data):
     np.save(result_npy_path, k_fold_result)
 
     # 保存id label
-    k_fold_result = np.mean(k_fold_result, axis=0)
-    result = np.argmax(k_fold_result, axis=-1)
-    df = pd.DataFrame({'node_idx': test_nid, 'label': result})
+    # k_fold_result = np.mean(k_fold_result, axis=0)
+    # result = np.argmax(k_fold_result, axis=-1)
+    # df = pd.DataFrame({'node_idx': test_nid, 'label': result})
 
-    nodes_path = os.path.join('../final_dataset', 'IDandLabels.csv')
-    nodes_df = pd.read_csv(nodes_path, dtype={'Label': str})
-    df['label'] = df['label'].apply(id2name)
-    mged = pd.merge(df, nodes_df[['node_idx', 'paper_id']], on='node_idx', how='left')
+    # nodes_path = os.path.join('../final_dataset', 'IDandLabels.csv')
+    # nodes_df = pd.read_csv(nodes_path, dtype={'Label': str})
+    # df['label'] = df['label'].apply(id2name)
+    # mged = pd.merge(df, nodes_df[['node_idx', 'paper_id']], on='node_idx', how='left')
 
-    result_csv = os.path.join(dataset_cfg['OUT_PATH'], '{}.csv'.format(dataset_cfg['TEST_PREFIX']))
-    pd.DataFrame({'id': mged['paper_id'], 'label': mged['label']}).to_csv(result_csv, index=False)
+    # result_csv = os.path.join(dataset_cfg['OUT_PATH'], '{}.csv'.format(dataset_cfg['TEST_PREFIX']))
+    # pd.DataFrame({'id': mged['paper_id'], 'label': mged['label']}).to_csv(result_csv, index=False)
 
 
 if __name__ == '__main__':
