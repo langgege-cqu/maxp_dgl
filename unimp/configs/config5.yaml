@@ -1,0 +1,60 @@
+MODEL:
+  GNN_MODEL: unimp
+  INPUT_SIZE: 300
+  FEAT_SIZE: 738
+  NUM_CLASS: 23
+  NUM_LAYERS: 2
+  NUM_HEADS: 8
+  HIDDEN_SIZE: 512
+  ATTN_HEADS: 8
+  LABEL_DROP: 0.1
+  FEAT_DORP: 0.05
+  GRAPH_DORP: 0.0
+  ATTN_DROP: 0.0
+  DROP: 0.2
+  USE_SAGE: True
+  USE_CONV: False
+  USE_ATTN: True
+  USE_RESNET: True
+  USE_DESNET: True
+  USE_SEMUL: False
+  GATV2: True
+  CHECKPOINT: ''
+
+
+OPTIMIZER:
+  LEARNING_RATE: 0.0005
+  COEF_LR: 1.0
+  SCHEDULE: warmup_linear
+  WEIGHT_DECAY: 0.0001
+  WARMUP_PROPORTION: 0.1
+
+
+CRITERION:
+  LOSS_TYPE: CL
+  NUM_CLASS: 23
+  GAMMA_NEG: 4
+  GAMMA_POS: 1
+  SMOOTHING: 0.1
+
+
+DATASET:
+  SEED: 2021
+  GRAPH_PATH: ../final_dataset/graph.bin
+  LABEL_PATH: ../final_dataset/order_labels/label_split5.pkl
+  NODE_PATH: ../final_dataset/features.npy
+  WALK_PATH: ../final_dataset/deep_walk1.npy
+  EDGE_PATH: ../final_dataset/features_neigh.npy
+  EPOCHS: 50
+  BATCH_SIZE: 1600
+  LOG_STEP: 200
+  FANOUTS: [30, 30]
+  NUM_CLASS: 23
+  REPLACE_LABEL: 0.04
+  MASK_LABEL: 0.16
+  EDGE_DROP: 0.2
+  NUM_WORKERS: 2
+  GRADIENT_ACCUMULATION_STEPS: 1
+  OUT_PATH: ../final_models/deepwalk1/split5
+  MODEL_PREFIX: split5
+  TEST_PREFIX: split5
