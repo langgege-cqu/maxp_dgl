@@ -28,7 +28,7 @@
 
 ## 三、下载代码
 
-* gitlab仅下载代码部分
+* gitlab仅下载代码部分(答辩完后开放gitlab)
 
 ```sh
  git clone -b submit https://gitee.com/fu-lang/dgl.git
