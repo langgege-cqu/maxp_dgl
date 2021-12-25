@@ -67,7 +67,7 @@ cd unimp
 
 # 融合七个五折模型进行预测
 CUDA_VISIBLE_DEVICES=0 python test.py
-# 输入结果文件见unimp/prediction.csv
+# 输出结果文件见unimp/prediction.csv
 ```
 
 ## 六、数据预处理
