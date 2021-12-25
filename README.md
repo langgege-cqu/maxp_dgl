@@ -28,10 +28,10 @@
 
 ## 三、下载代码
 
-* gitlab仅下载代码部分(答辩完后开放gitlab)
+* 下载代码部分
 
 ```sh
- git clone -b submit https://gitee.com/fu-lang/dgl.git
+ git clone https://github.com/langgege-cqu/maxp_dgl.git
 ```
 
 * 完整项目见[百度云盘](https://pan.baidu.com/s/1wCybVuV8CdRsuV3-43MTpw)，提取码：`2inq`
