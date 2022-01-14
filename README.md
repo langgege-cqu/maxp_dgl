@@ -34,8 +34,6 @@
  git clone https://github.com/langgege-cqu/maxp_dgl.git
 ```
 
-* 完整项目见[百度云盘](https://pan.baidu.com/s/1wCybVuV8CdRsuV3-43MTpw)，提取码：`2inq`
-
 ## 四、安装依赖
 
 进入项目根路径
@@ -47,7 +45,7 @@ conda activate dgl
 
 ## 五、模型复现
 
-* 下载[预处理好的数据](http://www.vtrust.top:4322/dgl/submit/final_dataset)，并放置于`final_dataset`文件夹中
+* 下载[预处理好的数据](https://gohttpserver.asyouknow.cn:606/dgl/submit/final_dataset)，并放置于`final_dataset`文件夹中
 
   需要保证`final_dataset`中拥有以下文件，目录结构如下所示：
 
